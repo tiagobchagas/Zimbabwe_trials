@@ -1,0 +1,727 @@
+---
+title: "Zimbabwe Soybean Trials"
+author: "José Tiago"
+date: "`r Sys.Date()`"
+always_allow_html: yes
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading data
+```{r}
+library(tidyverse) 
+data <- read.csv("data/Zimbabwe.csv",header = T,sep = ";")
+colnames(data)
+head(data)
+pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)] 
+table(pheno$LOCATION_NAME)
+colnames(pheno)
+pheno$geno <- gsub(" ", "_",pheno$Crop_Variety)
+table(pheno$Crop_Variety)
+table(pheno$geno)
+
+pheno[which(pheno$HARV_DATE==""),"LOCATION_NAME"]
+
+pheno$DTH <- as.Date(as.character(pheno$HARV_DATE), format="%m/%d/%Y")-
+                  as.Date(as.character(pheno$PLANT_DATE), format="%m/%d/%Y")-5
+dim(pheno)
+colnames(pheno)
+head(pheno)
+str(pheno)
+pheno$GRAIN_YLD_13PCT <-  gsub(",", ".", pheno$GRAIN_YLD_13PCT)
+trial <-  gsub("_.*", "", pheno$LOCATION_NAME)
+pheno$trial <- paste0(trial,"_", pheno$CROP_SEASON)
+unique(pheno$TRIAL_NAME) # 41 trials
+unique(pheno$LOCATION_NAME) # 14 Locations
+unique(pheno$CROP_SEASON) # 6 years
+length(unique(pheno$Crop_Variety)) #98 genotypes
+head(pheno)
+pheno <- pheno |> rename("Plant Height"=8, "Grain Yield"=9, "Plant lodging"=7, "rep"=4)
+
+traits <- c(colnames(pheno)[c(7,8,9)])
+traits
+pheno[, traits] <- lapply(pheno[, traits], as.numeric)
+
+factors <- c(colnames(pheno)[c(1,2,3,4,5,6,14,15,16,17)])
+factors
+
+
+traits <- c(colnames(pheno)[c(7,8,9)])
+traits
+
+pheno[, factors] <- lapply(pheno[, factors], as.factor)
+head(pheno)
+```
+
+
+
+# Data visualization
+
+```{r}
+
+pheno_long <- reshape2::melt(pheno, measure.vars = traits, variable.name = "trait") #transformando o pheno em formato longo
+head(pheno_long)
+
+ggplot(pheno_long, aes(x = trait, y = value, color = trait)) + geom_boxplot(outlier.shape = NA)+
+    geom_point(alpha = 0.2, position = "jitter", size = 1) + facet_grid(trait~LOCATION_NAME,
+    scales = "free_y") + theme_bw() + theme(axis.text.x = element_text(angle=90))
+
+library(ggh4x)
+library(ggpmisc)
+
+data_vis=ggplot(data = pheno_long, aes(x=trait, y= value, color=trait)) +
+  geom_boxplot() +
+  geom_point( position = "jitter", alpha = 0.5) +  facet_nested(trait~LOCATION_NAME+CROP_SEASON, scales = "free_y") +
+  theme_bw();data_vis
+```
+
+
+
+
+
+
+```{r}
+locations <-  pheno[,c("TRIAL_NAME","LOCATION_NAME","SITE_LAT","SITE_LONG")]
+locations_unq <- locations |> distinct(SITE_LAT,.keep_all = TRUE)
+
+locations_unq <- locations_unq[-21,]
+smart_clean_coords <- function(x, decimal_places = 5) {
+  # Replace commas with dots (fix decimals)
+  x <- gsub(",", ".", x)
+  
+  # Remove thousand separators (dots between digits)
+  x <- gsub("(?<=\\d)\\.(?=\\d)", "", x, perl = TRUE)
+  
+  # Convert to numeric (handles scientific notation like 0.00E+00)
+  num <- as.numeric(x)
+  
+  # Function to scale down numbers that are too large
+  scale_if_needed <- function(val) {
+    if (is.na(val)) return(NA)
+    
+    # Latitude should be between -90 and 90
+    if (abs(val) > 90) {
+      # Keep dividing by 10 until in valid range
+      while (abs(val) > 90) {
+        val <- val / 10
+      }
+      return(val)
+    } else {
+      return(val)  # Already valid, return as-is
+    }
+  }
+  
+  # Apply scaling only where needed
+  num <- sapply(num, scale_if_needed)
+  
+  # Round to specified decimal places
+  round(num, decimal_places)
+}
+locations_unq$SITE_LAT <- smart_clean_coords(locations_unq$SITE_LAT)
+locations_unq$SITE_LONG <- smart_clean_coords(locations_unq$SITE_LONG)
+
+write.csv(locations_unq,file = "data/loc_unq.csv",row.names = F)
+```
+
+# Mapping the trials
+```{r}
+library(raster)
+library(RColorBrewer)
+
+#Escolha sua pasta de trabalho Control+Shift + H
+
+#Importando o Brasil
+Africa<- shapefile('data/Africa_Biomes_Dataset.shp')
+Africa
+
+#plot(brasil, axes=T, main= 'Brasil')
+
+
+WGS84<-CRS("+proj=longlat +datum=WGS84 +no_defs ") #
+
+
+# reg <- unique(brasil@data$REGIAO) #Obtendo o nome das regi?es
+# (mreg <- match(brasil@data$REGIAO, reg))
+# text(brasil, 'UF', cex=.6, halo=TRUE)
+
+
+#Pacote Brewer Pal 
+display.brewer.all(colorblindFriendly=T)
+
+(paleta.colbrewer<-brewer.pal('Blues', n=5))
+#paleta<- c("blue","red","green","magenta","yellow")
+
+#plot(brasil, col=paleta[mreg], axes=T)
+plot(Africa, col=paleta.colbrewer, axes=T)
+text(brasil, 'UF', cex=.6, halo=TRUE)
+
+pontos<- read.csv("data/loc_unq.csv", header=TRUE, sep=',') # se estiver usando outro OS
+table(pontos$SITE_LONG)
+head(pontos)
+tail(pontos)
+str(pontos)
+# pontos[which(pontos$latitude < -23),]
+# pontos[which(pontos$Instituicao=="CATI/Avare"),"regiao"]="SE"
+# pontos[which(pontos$Instituicao=="DETEC/Itai"),"regiao"]="SE"
+# pontos[which(pontos$cidade=="Campos Novos"),"regiao"]="SU"
+
+
+
+# Apply to your data (5 decimal rounding)
+pontos$SITE_LAT <- smart_clean_coords(pontos$SITE_LAT)
+pontos$SITE_LONG <- smart_clean_coords(pontos$SITE_LONG)
+
+# Check results
+head(pontos)
+tail(pontos)
+
+coordinates(pontos)<- ~ SITE_LONG + SITE_LAT
+
+WGS84<-CRS("+proj=longlat +datum=WGS84 +no_defs ") #
+#plot(pontos,pch=20,cex=0.5, add=T)
+crs(pontos)<-WGS84
+
+
+# fv <- unique(pontos$regiao) 
+# (m <- match(pontos$regiao, fv)) 
+plot(pontos, bg=rainbow(4),pch=21, cex=0.75,add=T) 
+
+#inserindo legenda
+legend("bottomright",title ='Regions' ,legend = fv,cex = 1,x.intersp = 1,pch = 21, pt.cex = 2,pt.bg = rainbow(4))
+
+
+#EXTRAS
+#Plotando o norte
+library(png)
+library(grid)
+
+norte<- readPNG('Norte.png')
+grid.raster(norte, x=.7, y=0.8, width=.05)
+
+#Escala
+scalebar(d=5000,type='bar',divs=4)
+
+agro<- raster('data/agro.tif') # Importando o Raster de elevação
+hwsd <- raster('data/hwsd.tif')
+
+plot(hwsd, main="Elevation") # Plotando o Raster de elevação
+plot(agro, main="agro",col=rainbow(30))
+
+palete.spec<- brewer.pal("Spectral",n=11)
+plot(agro, main="Elevation", col= rev(palete.spec)) 
+
+plot(africa, add=TRUE) #Adicionando o mapa do brasil
+
+
+#Selecionando os estados
+
+#brasil[LINHA , COLUNA]
+# brasil
+# 
+# uf<- brasil[brasil@data$UF %in% c('MT','GO','RS','PE','BA','ES','DF',
+#             'RJ','AL','SE','MG','MS','SP','PR','SC'),] #Mesma indexacao de data.frame
+# uf
+# 
+# plot(uf, col='orange')
+# plot(uf, col=c("red","blue"))
+# text(uf,'UF', cex=1, halo=T)
+
+#Cortando um raster para o estado
+
+#for( i in 1:5){
+agro_crop<- crop(agro,pontos)
+plot(agro_crop)
+hwsd_crop<- crop(hwsd,pontos)
+plot(hwsd_crop)
+
+# elev_uf<-mask(elev_uf,uf)
+# plot(elev_uf, col=rev(palete.spec))
+
+writeRaster(elev_uf,filename= "./UF_elev", overwrite=TRUE)
+writeRaster(elev_uf,filename= "./UF_elev", overwrite=TRUE)
+#raster::writeRaster(elev_uf,filename = paste0('Raster/r',i))
+#}
+
+
+plot(pontos, bg=rainbow(4)[m],pch=21, cex=0.75,axes=T,add=T) 
+
+
+#Juntando tudo
+#plot(uf, col='orange',axes=TRUE)
+plot(elev_uf, col=rev(palete.spec), legend=F)
+plot(brasil, add=T)
+plot(pontos, bg=rainbow(4)[m],pch=21, cex=0.75,axes=T,add=T) 
+legend("bottomright",pch=21,pt.cex=2, pt.bg=rainbow(4),legend = fv,cex = 1,y.intersp = 1.1, title = 'Brazillian regions',inset =0.01 )
+text(brasil, 'UF', cex=.6, halo=TRUE)
+
+```
+
+
+## ggplot2
+```{r}
+#Com ggplot2
+
+# elevação
+
+library(raster)
+library(RColorBrewer)
+library(ggplot2)
+library(sf)
+
+africa.sf<-st_read("data/afr_g2014_2013_0.shp")
+# uf.sf<- brasil.sf[brasil.sf$UF %in% c('MT','GO','RS','PE','BA','ES','DF',
+#             'RJ','AL','SE','MG','MS','SP','PR','SC'), ]
+
+# elevação
+#Selecionando os estados
+
+africa<- shapefile('data/afr_g2014_2013_0.shp')
+africa
+#brasil[LINHA , COLUNA]
+
+
+uf<- africa[africa@data$ADM0_NAME%in% c("Zimbabwe"),] #Mesma indexacao de data.frame
+
+
+
+# # uf
+# 
+ plot(uf, col='orange')
+# plot(uf, col=c("red","blue"))
+# text(uf,'UF', cex=1, halo=T)
+
+#Cortando um raster para o estado
+agro<- raster('data/agro.tif') # Importando o Raster de elevação
+hwsd <- raster('data/hwsd.tif')
+
+plot(agro)
+plot(hwsd)
+#for( i in 1:5){
+hwsd_africa<- crop(africa,uf)
+plot(hwsd_africa)
+
+hwsd_africa<-mask(africa,uf)
+plot(hwsd_africa)
+palete.spec<- brewer.pal("Spectral",n=11)
+#plot(elev_uf, col=rev(palete.spec))
+
+writeRaster(hwsd,filename= "data/hwsd_map", overwrite=TRUE)
+writeRaster(agro,filename= "data/agro_map", overwrite=TRUE)
+WGS84<-CRS("+proj=longlat +datum=WGS84 +no_defs ") #
+#pontos
+pontos<- read.csv("data/loc_unq.csv", header=TRUE, sep=',') # se estiver usando outro OS
+str(pontos)
+# pontos[which(pontos$latitude < -23),]
+# pontos[which(pontos$Instituicao=="CATI/Avare"),"regiao"]="SE"
+# pontos[which(pontos$Instituicao=="DETEC/Itai"),"regiao"]="SE"
+# pontos[which(pontos$cidade=="Campos Novos"),"regiao"]="SU"
+
+# Apply to your data (5 decimal rounding)
+# pontos$SITE_LAT <- smart_clean_coords(pontos$SITE_LAT)
+# pontos$SITE_LONG <- smart_clean_coords(pontos$SITE_LONG)
+
+# Check results
+head(pontos)
+tail(pontos)
+
+coordinates(pontos)<- ~ SITE_LONG + SITE_LAT
+str(pontos)
+
+#plot(pontos,pch=20,cex=0.5, add=T)
+crs(pontos)<-WGS84
+
+
+# fv <- unique(pontos$regiao) 
+# (m <- match(pontos$regiao, fv)) 
+
+#########
+### Plotando o mapa do Brasil 
+#
+
+ggplot() + 
+  geom_sf(data = africa.sf)
+  #scale_fill_discrete(type = c("blue",'yellow','red','magenta','green'))
+
+#########
+### Plotando o mapa do Brasil  e da regiao cortada
+#
+
+ggplot() + 
+  geom_sf(data = africa.sf, fill="white")
+
+
+pontos.sf
+pontos
+#########
+### Aproximando para a regi?o cortada
+#
+
+
+pontos@coords.nrs
+(bbox_uf<-st_bbox(uf)) #Pegando os limites da regi?o cortada
+ggplot() + 
+  geom_sf(data = africa.sf, fill="white") +
+  #Código para definir os limites do mapa cood_sf()
+    coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"]),crs = "WGS84")+
+   theme_light()
+  # 
+  
+
+#########
+### Adicionando os rótulos de estado
+#
+
+ggplot() + 
+  geom_sf(data = africa.sf, fill="grey") +
+  theme_light()
+ 
+#########
+### Plotando pontos
+#
+
+(pontos.sf<-data.frame(pontos)) #retornando nossos pontos para tabela
+
+# pontos.sf <-pontos.sf[-21,] 
+pontos.sf
+# ggplot() + 
+#   geom_sf(data = brasil.sf, fill="grey") +
+#   geom_sf(data = uf.sf,fill="white")+
+#   coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"])) +
+#   geom_sf_label(data = brasil.sf, aes(label = UF),fill=NA,label.size = NA)+
+#   #Código para plotagem de pontos (geom_point)
+#   geom_point(data = pontos.sf, mapping = aes(x = longitude, y = latitude, color=regiao),size =1) + 
+#   scale_color_manual(breaks = c("NE", "CO", "SE","SU"),values=rainbow(4))+
+#   theme_light()+ guides(color = guide_legend(title = "Region"))+labs(y="Latitude",x="Longitude")
+
+
+
+#########
+### com rasters
+#
+# install.packages("tmap")
+library(stars)
+
+elev_uf.stars<- read_stars("data/hwsd_map.grd",RasterIO = list(nBufXSize = 600, nBufYSize = 600))
+# elev_uf.stars<- read_stars("data/agro_map.grd",RasterIO = list(nBufXSize = 600, nBufYSize = 600))
+names(elev_uf.stars)<-"Elevation"
+pontos
+
+st_bbox(africa)
+(bbox_uf<-st_bbox(uf))
+(pontos.sf<-data.frame(pontos)) 
+
+mapa=ggplot() + 
+  geom_sf(data = africa.sf, fill="white") +
+  #Código para plotagem do rater geom_stars()+
+  coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"]),crs = "WGS84") +theme_light()+
+  geom_point(data = pontos.sf, mapping = aes(x = SITE_LONG, y = SITE_LAT),size =1,show.legend = T)+
+    geom_sf_label(data = africa.sf, aes(label = ADM0_NAME),fill=NA,label.size = NA)+theme(legend.position = "none",axis.text.x =element_text(angle = 90))+labs(x="",y="");
+mapa
+
+
+africamap=ggplot() + 
+  geom_sf(data = africa.sf, fill="white")+
+    scale_fill_distiller(palette = "RdYlGn",na.value = NA,name = "Altitude")+
+  geom_stars(data = elev_uf.stars,alpha =0.8)+
+  coord_sf(xlim =c(-25.35875,63.50265) ,ylim=c(-46.9813,  37.56095),crs = "WGS84")+labs(y="Latitude",x="Longitude")+
+  theme_light()+theme(legend.position = "none")+
+  geom_rect(data=africa.sf,
+    xmin = 25.23703,
+    ymin =-22.41774,
+    xmax = 33.05630,
+    ymax =-15.60883 ,
+    fill = NA, 
+    colour = "black",
+    linewidth = 0.8
+  );
+africamap
+
+
+library(cowplot)
+
+map=africamap |> ggdraw()+
+  draw_plot(
+    {
+      mapa + 
+        coord_sf(
+          xlim = c(25.23703, 33.05630),
+          ylim = c(-22.41774, -15.60883),
+          expand = FALSE) +
+        theme(legend.position = "none")
+      },
+    # The distance along a (0,1) x-axis to draw the left edge of the plot
+    x = 0.13, 
+    # The distance along a (0,1) y-axis to draw the bottom edge of the plot
+    y = 0.05,
+    # The width and height of the plot expressed as proportion of the entire ggdraw object
+    width = 0.40, 
+    height = 0.40);
+map
+
+
+
+
+
+
+
+
+
+ggsave(plot=map,device = "pdf",filename ="Plots/soybean_zimbabwe.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=map,device = "png",filename ="Plots/soybean_zimbabwe.png",dpi = "retina",height = 6,width = 8)
+
+mapa_pt=ggplot() + 
+  geom_sf(data = brasil.sf, fill="grey") +
+  #Código para plotagem do rater geom_stars()
+  geom_stars(data = elev_uf.stars,alpha =0.8)+
+  scale_fill_distiller(palette = "Spectral",na.value = NA,name = "Altitude")+
+  geom_sf(data = uf.sf,fill=NA)+
+  coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"])) +theme_light()+
+  geom_sf_label(data = brasil.sf, aes(label = UF),fill=NA,label.size = NA)+geom_point(data = pontos.sf, mapping = aes(x = longitude, y = latitude, color= regiao),size =1,show.legend = T) + 
+  scale_color_manual(breaks = c("NE", "CO", "SE","SU"),values=c("#FF0000", "#0000FF","#8000FF", "#FF00FF"))+
+guides(color = guide_legend(title="Região Brasileira"))+labs(y="Latitude",x="Longitude")
+mapa_pt
+
+ggsave(plot=mapa_pt,device = "pdf",filename ="Plots/common_bean_field_trials_map_pt.pdf",dpi = "retina")
+ggsave(plot=mapa_pt,device = "png",filename ="Plots/common_bean_field_trials_map_pt.png",dpi = "retina")
+
+```
+
+# Single-environment analyses
+
+These analyses had a purpose: to test the significance of the genetic variance in each environment. We used the following model:
+
+$$
+ \mathbf{y} = \mathbf{X_1b} + \mathbf{X_2che} + \mathbf{Z_1g} + \mathbf{\epsilon} 
+$$
+
+where $\mathbf{y}$ is the vector of phenotypic observations, $\mathbf{b}$ is the vector of fixed effects of replication, $\mathbf{che}$ is the vector of fixed effects of checks, $\mathbf{g}$ is the vector of random effects of genotypes  and $\mathbf{\epsilon}$ the vector of errors. $\mathbf{X_1}$, $\mathbf{X_2}$, $\mathbf{Z_1}$ $ are incidence matrix of $\mathbf{b}$, $\mathbf{g}$  effects respectively.
+
+At each environment, we filtered out trials that do not have significance for genotype effect. The Likelihood Ratio Test ($LRT$) was computed as follows:
+
+$$
+LRT= −2 \times (Log𝐿 - Log L_𝑅)
+$$
+
+where $L$ is the maximum point of residual likelihood function of the complete model and $L_R$ is the same for the reduced model, that is, without the effect to be tested. The LRT value was compared with a tabulated value based on the chi-square table, with one degree of freedom and 0.95 probability.
+
+We calculated the broad-sense heritability ($h^2$):
+
+$$
+h^2 = \sigma^2g    / \sigma^2g + \sigma^2e
+$$
+
+where $\sigma^2g$ is the is the additive genetic variance,$\sigma^2g$ is non additive genetic variance and $\sigma_e^2$ is the error variance.
+
+## STMT
+
+```{r first step,eval=FALSE, echo=TRUE}
+source("https://raw.githubusercontent.com/saulo-chaves/May_b_useful/main/update_asreml.R")
+#source("GEBV/codes/outliers.R")
+
+library(asreml)
+
+data.list = split(pheno, f = pheno$trial)
+
+traits
+stmt = list()
+j="Banket_2018" 
+#j="2021NAC_ST01"
+i="Plant lodging"
+unique(pheno$trial)
+
+
+for (j in names(data.list)) {
+  
+   x = data.list[[j]]
+  cat("====> Environment:", j, fill = TRUE)
+  
+
+
+ #   A.env = full2sparse(K = amat[which(rownames(amat) %in%
+ #                                              c(x$geno)),
+ #                                     which(colnames(amat) %in%
+ #                                            c(x$geno))])
+ # attr(A.env, "INVERSE") = FALSE
+ 
+#  H.env.van = full2sparse(K = H.inv.van[which(rownames(H.inv.van) %in%
+#                                               c(x$geno)),
+#                                      which(colnames(H.inv.van) %in%
+#                                             c(x$geno))])
+#  
+# attr(H.env.van, "INVERSE") = TRUE
+
+
+  # x = x |> mutate(nad=geno)  |> mutate_at(vars(env, rep, geno, row, col, check,nad), as.factor)
+  
+  summar.mat = matrix(nrow = length(traits), ncol = 4, 
+                      dimnames = list(traits, 
+                                      c("geno","error","H2", "CV")))
+
+  vc.env = list()
+  Blue.env = list()
+  
+  for (i in traits) {
+    
+    cat("====> Trait:", i, fill = TRUE)
+    
+    if(all(is.na(x[,i]))) next
+    
+    model.r = asreml(fixed = x[,i] ~ rep, 
+                   random = ~ geno,maxit = 50,
+                   data = x, na.action = na.method(x = "include", y = "include"))
+    
+
+    
+   # colocar nugget and spline
+    model.f = asreml(fixed = x[,i] ~ rep+geno, 
+                    maxit = 50,
+                   residual = ~units,
+                   data = x, na.action = na.method(x = "include", y = "include"))
+ 
+    if(!model.r$converge) next
+    
+    if(any(na.exclude(model.r$vparameters.pc > 1))) model.r = update.asreml(model.r)
+    # varcomp = summary(modelhvan)$varcomp
+    varcomp = summary(model.r)$varcomp
+      varcomp.df = data.frame(
+      effect = c('genotypic', "residual"),
+      component = c(round(
+        varcomp[grep('geno', rownames(varcomp)),1],4),
+        round(varcomp[grep('!R', rownames(varcomp)),1],4))
+    )
+     # if(!modelad$converge) next
+     # 
+     # if(any(na.exclude(modelad$vparameters.pc > 1))) modelad = up.mod(modelad)
+     # 
+    if(!model.f$converge) next
+    
+    if(any(na.exclude(model.f$vparameters.pc > 1))) model = up.mod(model.f)
+      
+    lrtest = as.data.frame(lrt(asreml(fixed = x[,i] ~ rep, 
+                        residual = ~units, maxit = 50,
+                        data = x),model.r))
+    lrtest=up.mod(lrtest)
+      
+    lrtest$effect = c("genotypic")
+    
+    varcomp= full_join(varcomp.df, lrtest[,-1], by = "effect")
+    varcomp$signi = ifelse(varcomp$`Pr(Chisq)` <= 0.06, "*", "ns")
+    varcomp$signi2 = ifelse(varcomp$`Pr(Chisq)` <= 0.06, 
+                            paste(round(varcomp$component, 4), "*"), 
+                            paste(round(varcomp$component, 4), "ns"))
+    rownames(varcomp)=varcomp$effect
+    
+    pred = predict(model.r, classify = "geno", sed = TRUE)
+    pred$sed= pred$sed[-which(pred$pvals$status=="Aliased"),-which(pred$pvals$status=="Aliased")]
+    MVdelta = mean((pred$sed^2)[upper.tri(pred$sed^2,diag = F)])
+    H2 = 1-(MVdelta/(2*varcomp[varcomp$effect == "genotypic","component"]))
+    h2 = vpredict(model.r, h2~(V1)/(V1+V2))
+
+
+
+    #h2ad = vpredict(modelad, h2~(V3)/(V3+V4))
+ 
+    CV = sqrt(varcomp[grep("r", rownames(varcomp)),"component"])/
+      mean(x[,i], na.rm = TRUE)*100
+    
+    summar.mat[i,] = c(varcomp$signi2[1], round(varcomp$component[2],4), 
+                       round(h2$Estimate,4), round(CV,4))
+    
+    
+    pred=predict(model.f, classify = "geno", vcov = T)
+
+
+    pred$vcov= pred$vcov[-which(pred$pvals$status=="Aliased"),-which(pred$pvals$status=="Aliased")]
+    pred$pvals= pred$pvals[-which(pred$pvals$status=="Aliased"),]
+
+    pred$pvals$w=diag(solve(pred$vcov))
+    pred=pred$pvals
+    
+  vc.env[[i]] = varcomp.df
+
+  Blue.env[[i]] = pred
+  }
+  stmt[[j]] = list(Blues = Blue.env,summary = summar.mat,vc=vc.env)
+  
+  rm(summar.mat,GEBV.env, varcomp, lrtest, model, 
+     h2, CV, x, H.inv.env)
+}
+
+saveRDS(stmt, file = "Saves/stmt.rds")
+#rm(data.list)
+
+#hist(data[which(data$env=="UGN2021ABI_ST02"),"rytha"])
+#table(data[which(data$env=="UGN2021ABI_ST02"),"rytha"],useNA = "ifany")
+
+#table(data[which(data$env=="UGN2020NAS_ST04"),"vir2"], useNA = "ifany")
+
+```
+### Results
+```{r}
+stmt=readRDS("Saves/stmt.rds")
+
+stvc=lapply(stmt, function(x)as.data.frame(cbind(x$summary)))
+
+#stvc.df=lapply(stmti, function(x)as.data.frame(cbind(x$vc)))
+
+
+
+#stmt[[1]][["Blues"]][[1]][,-c(3,4)]
+
+
+stvc=do.call(rbind,stvc)
+stvc$trait=rownames(stvc)
+stvc$env=sub("\\..*","",stvc$trait)
+stvc$trait = sub(".*\\.","",stvc$trait)
+stvc$geno_sig=sub("^\\S+\\s+","",stvc$geno)
+stvc$geno=sub("\\s.*","",stvc$geno)
+stvc$geno= as.numeric(stvc$geno)
+stvc$H2=as.numeric(stvc$H2)
+stvc$error=as.numeric(stvc$error)
+stvc$CV=as.numeric(stvc$CV)
+library(tidyverse)
+head(stvc)
+stvcl= stvc |> select(geno, error, trait, env, geno_sig) |> pivot_longer(geno:error) 
+  
+
+unique(stvc$env)
+# cols.label=c("A20NAC", "A20NAS", "B20NAS", "A21ABI" ,"B21ABI","A21NAC", "B21NAC", "A21NAS", "B21NAS")
+# names(cols.label)=c(unique(stvc$env)) 
+
+stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_grid(trait~env,scales = "free_y") + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top", )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top", ) + labs(x="Effects", y="Genotypic variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 ) 
+
+View(stvcl)
+
+stvc_bef <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
+  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+
+stvc$CV[stvc$CV == 948.7212] <- NA
+stvc$CV[stvc$CV == 130.8657] <- NA
+stvc$CV[stvc$CV == 129.7948] <- NA
+
+stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
+  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+
+   z = data.list[["Stapleford_2018"]]
+   z = data.list[["Harare_2021"]]
+   table(z$`Plant lodging`)
+   z = data.list[["Harare_2020"]]
+   table(z$`Plant lodging`)
+    z = data.list[["Harare_2022"]]
+   table(z$`Plant lodging`)
+   
+   
+   stvc |> mutate(CV = case_when(CV == 948.7212~NA))
+```
+
