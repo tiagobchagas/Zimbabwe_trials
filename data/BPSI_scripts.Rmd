@@ -1,0 +1,198 @@
+---
+title: "BPSI pipeline"
+author: "José Tiago"
+date: "2024-10-26"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 3
+  word_document:
+    toc: true
+    toc_depth: '3'
+  html_document:
+    toc: true
+    toc_depth: '3'
+    df_print: paged
+bibliography: references.bib
+editor_options:
+  chunk_output_type: console
+header-includes:
+  - \usepackage{longtable}
+  - \usepackage{booktabs}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, echo = TRUE, tidy = TRUE, warning = FALSE, 
+message = FALSE,   fig.width = 10, fig.height = 7)
+#knitr::opts_knit$set(root.dir = "./")
+```
+
+
+
+\pagebreak
+
+
+
+# Bayesian Probabilistic Selection Index (BPSI)
+
+
+BPSI is a selection index that allows select genotypes through the probability of superior performance across environments @Dias2022.
+
+
+
+
+$$
+Pr(\hat{g}_i \in \Omega | y) = \frac{1}{S} \sum_{s=1}^SI(\hat{g}_i^{(S)} \in \Omega|y)
+$$
+
+ 
+ 
+where $\hat{g}_i$ is the posterior genotypic value, $\Omega$ is the superior group given the desired selection intensity, S represents the number of samples from the posterior distribution, and I $\left({\hat{g}}_i^{\left(s\right)}\ \in \Omega\middle|y\right)$ is an indicator variable for success (1) or failure (0). Selection intensity was set at 20%. 
+
+
+We run the Bayesian model for each trait and after bind all them in a probabilistic rank of superior performance.
+
+
+
+# Bayesian model
+
+
+The Bayesian model was carried out in ProbBreed package @Chaves2023 .
+
+
+``` {r, eval=FALSE,echo=TRUE}
+
+library(ProbBreed)
+library(tidyverse)
+head(met_df)
+met_df=met_df |> rename("GY"=7,"LOD"=8,"CB"=9) 
+head(met_df)
+mod = bayes_met(data = met_df, 
+                gen = "id",
+                loc = "env",
+                repl = c("block"),
+                trait = "GY", 
+                reg = NULL,
+                year = NULL, 
+                res.het = T, 
+                iter = 4000, cores = 4, chain = 4)
+saveRDS(mod,file = "Simulation data/mod_T1S1.rds")
+
+mod2 = bayes_met(data = met_df, 
+                gen = "id",
+                loc = "env",
+                repl = c("block"),
+                trait = "LOD", 
+                reg = NULL,
+                year = NULL, 
+                res.het = T, 
+                iter = 4000, cores = 4, chain = 4)
+saveRDS(mod2,file = "Simulation data/mod_T2S1.rds")
+
+mod3 = bayes_met(data = met_df, 
+                gen = "id",
+                loc = "env",
+                repl = c("block"),
+                trait = "CB", 
+                reg = NULL,
+                year = NULL, 
+                res.het = T, 
+                iter = 4000, cores = 4, chain = 4)
+saveRDS(mod3,file = "Simulation data/mod_T3S1.rds")
+#mod3=readRDS("Simulation data/mod_T3S1.rds")
+#attr(mod3,"data")
+
+```
+
+
+# Probability of superior performance
+
+
+The Probbreed package helped to estimate the probabilities for the BPSI ranks @Chaves2024 .
+
+In this example we simulated 200 maize genotypes evaluated for grain yied, lodging and culm break in three environments. We used the packages alphasimR (@Gaynor2021) and fieldsimR (@Werner2024) to simulate genotype and phenotype effects respectively.
+
+
+``` {r BPSI, eval=F, echo=TRUE}
+rm(list=ls())
+library(ProbBreed)
+library(tidyverse)
+
+models=list(mod,mod2,mod3)
+#models <- vector("list",length(mods))
+names(models) <- c("GY","LOD","CB")
+#str(models)
+outs= vector("list",length(models))
+names(outs) <- c("GY","LOD","CB")
+
+for (mods in 1:length(models)) {
+  
+  a= extr_outs(model = models[[mods]],
+                 probs = c(0.05, 0.95),
+                 verbose = TRUE)
+  outs[[mods]]=a
+  rm(a)
+}
+results= vector("list",length(outs))
+names(results) <- c("GY","LOD","CB")
+
+inc=c(TRUE,FALSE,FALSE)
+for (mods in 1:length(outs)) {
+  
+  a = prob_sup(extr = outs[[mods]], 
+                   int = .2,
+                   increase = inc[[mods]], 
+                   save.df = FALSE, 
+                   verbose = TRUE)
+  results[[mods]]=a
+  rm(a)
+}
+
+saveRDS(results,file = "Data/resultsS1.rds")
+
+
+
+```
+
+
+
+# Applying BPSI to example dataset
+
+```{r rank}
+results=readRDS("Data/resultsS1.rds")
+
+source("Data/bpsi_fun.R")
+
+bpsi=BPSI(modlist=results, increase = c(TRUE,FALSE,FALSE),int = 0.1,omega=c(2,1,1),save.df = F,verbose = T)
+```
+
+
+# BPSI plot
+
+Highlighting the ranking of probability of superior performance per trait of the selected families.
+
+```{r bpsi plot ranks}
+#| label: fig-ranks
+#| fig-cap: "Ranking of probability of superior performance per trait"
+library(knitr)
+
+plot(bpsi,category = "Ranks")
+```
+
+
+```{r bpsi plot}
+#| label: fig-bpsi
+#| fig-cap: "Selected families based on BPSI rank"
+plot(bpsi,category = "BPSI")
+library(kableExtra)
+
+bpsi$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE)
+
+
+```
+
+
+
+\pagebreak
+
+# References

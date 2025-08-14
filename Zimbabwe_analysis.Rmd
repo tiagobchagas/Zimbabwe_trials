@@ -20,6 +20,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Loading data
 ```{r}
+#install.packages("sf")
+#install.packages("stars")
 library(tidyverse) 
 data <- read.csv("data/Zimbabwe.csv",header = T,sep = ";")
 colnames(data)
@@ -28,6 +30,9 @@ pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)]
 table(pheno$LOCATION_NAME)
 colnames(pheno)
 pheno$geno <- gsub(" ", "_",pheno$Crop_Variety)
+pheno$geno <- factor(pheno$geno)
+unique(pheno$IRRIGATION)
+levels(pheno$geno) <- paste("G", 1:length(levels(pheno$geno)), sep = "_")
 table(pheno$Crop_Variety)
 table(pheno$geno)
 
@@ -62,6 +67,26 @@ traits
 
 pheno[, factors] <- lapply(pheno[, factors], as.factor)
 head(pheno)
+
+#Irrigation system
+table(pheno$trial,pheno$IRRIGATION, useNA = "ifany")
+unique(pheno$IRRIGATION)
+pheno[which(pheno$trial=="Banket_2019"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Banket_2020"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Bindura_2020"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Chisumbanje_2019"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Goromonzi_2019"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Goromonzi_2020"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Gwebi_2020"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Mutare_2019"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial==" Mutare_2020"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Stapleford_2019"),"IRRIGATION"] <- "Rainfed"
+pheno[which(pheno$trial=="Stapleford_2020"),"IRRIGATION"] <- "Rainfed"
+
+table(pheno$IRRIGATION)
+
+
+levels(pheno$IRRIGATION)
 ```
 
 
@@ -269,7 +294,7 @@ text(brasil, 'UF', cex=.6, halo=TRUE)
 
 
 ## ggplot2
-```{r}
+```{r,eval=FALSE}
 #Com ggplot2
 
 # elevação
@@ -283,6 +308,12 @@ africa.sf<-st_read("data/afr_g2014_2013_0.shp")
 # uf.sf<- brasil.sf[brasil.sf$UF %in% c('MT','GO','RS','PE','BA','ES','DF',
 #             'RJ','AL','SE','MG','MS','SP','PR','SC'), ]
 
+library(stringi)
+africa.sf$ADM0_NAME <- stri_replace_all_fixed(
+  africa.sf$ADM0_NAME,
+   "C\xf4te d'Ivoire",  # Literal special character
+  "Cote d'Ivoire"
+)
 # elevação
 #Selecionando os estados
 
@@ -373,7 +404,7 @@ pontos@coords.nrs
 ggplot() + 
   geom_sf(data = africa.sf, fill="white") +
   #Código para definir os limites do mapa cood_sf()
-    coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"]),crs = "WGS84")+
+    coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"]))+
    theme_light()
   # 
   
@@ -405,6 +436,8 @@ pontos.sf
 #   theme_light()+ guides(color = guide_legend(title = "Region"))+labs(y="Latitude",x="Longitude")
 
 
+problems <- africa.sf$ADM0_NAME[!stringi::stri_enc_isascii(africa.sf$ADM0_NAME)]
+if(length(problems) > 0) print(problems)
 
 #########
 ### com rasters
@@ -421,13 +454,14 @@ st_bbox(africa)
 (bbox_uf<-st_bbox(uf))
 (pontos.sf<-data.frame(pontos)) 
 
+
+
 mapa=ggplot() + 
   geom_sf(data = africa.sf, fill="white") +
   #Código para plotagem do rater geom_stars()+
   coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"]),crs = "WGS84") +theme_light()+
   geom_point(data = pontos.sf, mapping = aes(x = SITE_LONG, y = SITE_LAT),size =1,show.legend = T)+
-    geom_sf_label(data = africa.sf, aes(label = ADM0_NAME),fill=NA,label.size = NA)+theme(legend.position = "none",axis.text.x =element_text(angle = 90))+labs(x="",y="");
-mapa
+    geom_sf_label(data = africa.sf, aes(label = ADM0_NAME),fill=NA,label.size = NA)+theme(legend.position = "none",axis.text.x =element_text(angle = 90))+labs(x="",y="");mapa
 
 
 africamap=ggplot() + 
@@ -444,8 +478,7 @@ africamap=ggplot() +
     fill = NA, 
     colour = "black",
     linewidth = 0.8
-  );
-africamap
+  );africamap
 
 
 library(cowplot)
@@ -479,21 +512,6 @@ map
 
 ggsave(plot=map,device = "pdf",filename ="Plots/soybean_zimbabwe.pdf",dpi = "retina",height = 6,width = 8)
 ggsave(plot=map,device = "png",filename ="Plots/soybean_zimbabwe.png",dpi = "retina",height = 6,width = 8)
-
-mapa_pt=ggplot() + 
-  geom_sf(data = brasil.sf, fill="grey") +
-  #Código para plotagem do rater geom_stars()
-  geom_stars(data = elev_uf.stars,alpha =0.8)+
-  scale_fill_distiller(palette = "Spectral",na.value = NA,name = "Altitude")+
-  geom_sf(data = uf.sf,fill=NA)+
-  coord_sf(xlim =c(bbox_uf["xmin"],bbox_uf["xmax"]) ,ylim=c(bbox_uf["ymin"],bbox_uf["ymax"])) +theme_light()+
-  geom_sf_label(data = brasil.sf, aes(label = UF),fill=NA,label.size = NA)+geom_point(data = pontos.sf, mapping = aes(x = longitude, y = latitude, color= regiao),size =1,show.legend = T) + 
-  scale_color_manual(breaks = c("NE", "CO", "SE","SU"),values=c("#FF0000", "#0000FF","#8000FF", "#FF00FF"))+
-guides(color = guide_legend(title="Região Brasileira"))+labs(y="Latitude",x="Longitude")
-mapa_pt
-
-ggsave(plot=mapa_pt,device = "pdf",filename ="Plots/common_bean_field_trials_map_pt.pdf",dpi = "retina")
-ggsave(plot=mapa_pt,device = "png",filename ="Plots/common_bean_field_trials_map_pt.png",dpi = "retina")
 
 ```
 
@@ -723,5 +741,111 @@ stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV)
    
    
    stvc |> mutate(CV = case_when(CV == 948.7212~NA))
+```
+
+## preparing MT data
+```{r mtdata, results='hide'}
+traits 
+stmt = readRDS(file = "Saves/stmt.rds")
+
+str(stmt$Banket_2019)
+stmt$Banket_2019$Blues$`Plant lodging`
+i
+stmt$Banket_2018$Blues$`Plant lodging`$
+mtdata = list()
+diagnostic
+
+#i="Banket_2018"
+#j="Plant lodging"
+stmt$Banket_2018$Blues
+for (i in names(stmt)) {
+  mtdata[[i]] = stmt[[i]][["Blues"]][["Plant lodging"]][,-c(3,4)]
+  if(is.null(mtdata[[i]])){
+    mtdata[[i]] = stmt[[i]][["Blues"]][[j]][,-c(3,4)]
+    colnames(mtdata[[i]]) = c("geno", j, paste('w',j,sep = "_"))
+  mtdata[[i]]$env = i
+  mtdata[[i]] = mtdata[[i]][,c("geno","env",j, paste('w',j,sep = "_"))]
+  }else{
+  colnames(mtdata[[i]]) = c("geno", "Plant lodging", "w_Plant lodging")
+  mtdata[[i]]$env = i
+  mtdata[[i]] = mtdata[[i]][,c("geno","env","Plant lodging", "w_Plant lodging")]
+    }
+  for (j in traits.sel[-1]) {
+    if(print(all(mtdata$geno == stmt[[i]][["Blues"]][[j]][,1]))) cat("The names match", fill = TRUE)
+    
+    mtdata[[i]][,c(j, paste('w',j,sep = "_"))] = stmt[[i]][["Blues"]][[j]][,c(2,5)]
+
+  }
+}
+
+mtdata[[3]]$vir2=NA
+mtdata[[3]]$w_vir2=NA
+mtdata[[5]]$rytha=NA
+mtdata[[5]]$w_rytha=NA
+mtdata[[5]]=mtdata[[5]][,c("geno", "env" ,"Plant lodging", "w_Plant lodging" ,"Plant Height", "w_Plant Height" , "Grain Yield","w_Grain Yield")]
+
+met_data = do.call(rbind, mtdata); rownames(met_data) = NULL
+
+rm(mtdata)
+```
+
+```{r}
+diagnostic = do.call(rbind, lapply(stmt, function(x){
+  aa = as.data.frame(x$summary) |> rownames_to_column("trait")
+  aa
+})) |> rownames_to_column("env") |> 
+  mutate_at("env", str_replace, "\\..*", "") |> 
+  dplyr::select(env, trait, geno) |> 
+  separate(geno, into = c("genovar", "sig"), sep = " ")
+
+diagnostic
+dim(pheno)
+dim(pheno_filt)
+unique(pheno_filt$trial)
+levels(pheno_filt$trial)
+
+
+# inpheno# install.packages("ProbBreed")
+library(ProbBreed)
+head(pheno_filt)
+
+
+i=traits[2]
+i
+for (i in traits) {
+  message(paste("Analysis to", i))
+  # print(paste("Analysis to", i)) 
+  # cat("====> Trait:", i, fill = TRUE)
+  pheno_filt <- droplevels(pheno[
+    which(pheno$trial %in% diagnostic[which(diagnostic$trait == i &
+                                               diagnostic$sig == "*"), "env"]), ])
+  
+   
+  dim(pheno_filt)
+  mod = bayes_met(data = pheno_filt,
+                gen = "geno",
+                loc = "trial",
+                repl = c("rep"),
+                trait = paste(i),
+                reg = NULL,
+                year = NULL,
+                res.het = TRUE,
+                iter = 4000, cores = 2, chain = 4)
+  
+  
+saveRDS(mod,file = paste0("Saves/",i,".rds"))
+}
+
+
+
+
+
+```
+
+
+
+# Bayesian model
+```{r}
+
 ```
 
