@@ -790,6 +790,10 @@ rm(mtdata)
 ```
 
 ```{r}
+<<<<<<< HEAD
+=======
+stmt = readRDS(file = "Saves/stmt.rds")
+>>>>>>> b3abe4d (models)
 diagnostic = do.call(rbind, lapply(stmt, function(x){
   aa = as.data.frame(x$summary) |> rownames_to_column("trait")
   aa
@@ -810,8 +814,12 @@ library(ProbBreed)
 head(pheno_filt)
 
 
+<<<<<<< HEAD
 i=traits[2]
 i
+=======
+
+>>>>>>> b3abe4d (models)
 for (i in traits) {
   message(paste("Analysis to", i))
   # print(paste("Analysis to", i)) 
@@ -820,7 +828,10 @@ for (i in traits) {
     which(pheno$trial %in% diagnostic[which(diagnostic$trait == i &
                                                diagnostic$sig == "*"), "env"]), ])
   
+<<<<<<< HEAD
    
+=======
+>>>>>>> b3abe4d (models)
   dim(pheno_filt)
   mod = bayes_met(data = pheno_filt,
                 gen = "geno",
@@ -828,6 +839,7 @@ for (i in traits) {
                 repl = c("rep"),
                 trait = paste(i),
                 reg = NULL,
+<<<<<<< HEAD
                 year = NULL,
                 res.het = TRUE,
                 iter = 4000, cores = 2, chain = 4)
@@ -840,6 +852,34 @@ saveRDS(mod,file = paste0("Saves/",i,".rds"))
 
 
 
+=======
+                year = "CROP_SEASON",
+                res.het = TRUE,
+                iter = 4000, cores = 4, chain = 4)
+  
+  
+saveRDS(mod,file = paste0("Saves/",i,".rds"))
+rm(mod)
+}
+
+
+mod_PH=readRDS("Saves/Plant Height.rds")
+mod_PL=readRDS("Saves/Plant lodging.rds")
+
+
+
+outs_PH = extr_outs(model = mod_PH,
+                 probs = c(0.05, 0.95),
+                 verbose = TRUE)
+
+outs_PL = extr_outs(model = mod_PL,
+                 probs = c(0.05, 0.95),
+                 verbose = TRUE)
+
+saveRDS(outs_PH,file = "Saves/outs_PH.rds")
+saveRDS(outs_PL,file = "Saves/outs_PL.rds")
+
+>>>>>>> b3abe4d (models)
 ```
 
 
