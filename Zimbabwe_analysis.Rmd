@@ -838,7 +838,7 @@ for (i in traits) {
                 reg = NULL,
                 year = NULL,
                 res.het = TRUE,
-                iter = 100, cores = 4, chain = 4)
+                iter = 4000, cores = 4, chain = 4)
   
 #save(mod,file = paste0("Saves/",i,".rda"))  
 saveRDS(mod,file = paste0("Saves/",i,".rds"))
