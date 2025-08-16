@@ -812,9 +812,12 @@ diagnostic = do.call(rbind, lapply(stmt, function(x){
 library(ProbBreed)
 # head(pheno_filt)
 
-i=traits[3]
+i=traits[1]
 
-
+# Getting the path of your current open file
+current_path = rstudioapi::getActiveDocumentContext()$path 
+setwd(dirname(current_path ))
+print( getwd() )
 
 for (i in traits) {
   message(paste("Analysis to", i))
@@ -826,23 +829,23 @@ for (i in traits) {
   
 
    
-
   dim(pheno_filt)
   mod = bayes_met(data = pheno_filt,
                 gen = "geno",
-                loc = "trial",
+                loc = "LOCATION_NAME",
                 repl = c("rep"),
                 trait = paste(i),
                 reg = NULL,
-                year = "CROP_SEASON",
+                year = NULL,
                 res.het = TRUE,
-                iter = 4000, cores = 4, chain = 4)
+                iter = 100, cores = 4, chain = 4)
   
-# save(mod,file = paste0("Saves/",i,".rda"))  
+#save(mod,file = paste0("Saves/",i,".rda"))  
 saveRDS(mod,file = paste0("Saves/",i,".rds"))
 rm(mod)
 }
 
+rm(list=ls())
 
 mod_PH=readRDS("Saves/Plant Height.rds")
 mod_PL=readRDS("Saves/Plant lodging.rds")
@@ -865,22 +868,32 @@ saveRDS(outs_PH,file = "Saves/outs_PH.rds")
 saveRDS(outs_PL,file = "Saves/outs_PL.rds")
 saveRDS(outs_GY,file = "Saves/outs_GY.rds")
 
+setwd("./Saves/PH")
 res_PH = prob_sup(extr = outs_PH,
                    int = .2,
-                   increase = TRUE,
+                   increase = FALSE,
                    save.df = FALSE,
                    verbose = FALSE)
-res_PH = prob_sup(extr = outs_PH,
+setwd("../PL")
+
+res_PL = prob_sup(extr = outs_PL,
                    int = .2,
-                   increase = TRUE,
+                   increase = FALSE,
                    save.df = FALSE,
-                   verbose = FALSE)
+                   verbose = TRUE)
+setwd("../GY")
 
 res_GY = prob_sup(extr = outs_GY,
                    int = .2,
                    increase = TRUE,
                    save.df = TRUE,
                    verbose = FALSE)
+
+setwd("../")
+
+save(res_PL,file = "res_PL.rda")
+save(res_PH,file = "res_PH.rda")
+save(res_GY,file = "res_GY.rda")
 
 ```
 
