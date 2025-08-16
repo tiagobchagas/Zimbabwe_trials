@@ -899,8 +899,50 @@ save(res_GY,file = "res_GY.rda")
 
 
 
-# Bayesian model
+# BPSI
 ```{r}
+
+load("Saves/res_PL.rda")
+load("Saves/res_PH.rda")
+load("Saves/res_GY.rda")
+
+source("data/bpsi_fun.R")
+
+models= vector("list",length(3))
+names(models) <- c("GY","PH","PL")
+models[[1]] = res_GY;
+models[[2]] = res_PH
+models[[3]] = res_PL
+
+BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = 2,int = 0.2,save.df = T,verbose = T )
 
 ```
 
+
+# BPSI plot
+
+Highlighting the ranking of probability of superior performance per trait of the selected families.
+
+```{r bpsi plot ranks}
+#| label: fig-ranks
+#| fig-cap: "Ranking of probability of superior performance per trait"
+library(knitr)
+
+plot(BPSI_soy,category = "Ranks")
+```
+
+
+```{r bpsi plot}
+#| label: fig-bpsi
+#| fig-cap: "Selected families based on BPSI rank"
+plot(BPSI_soy,category = "BPSI")
+library(kableExtra)
+
+bpsi$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE)
+
+
+```
+
+
+
+\pagebreak
