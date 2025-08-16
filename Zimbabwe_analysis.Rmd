@@ -801,18 +801,18 @@ diagnostic = do.call(rbind, lapply(stmt, function(x){
   dplyr::select(env, trait, geno) |> 
   separate(geno, into = c("genovar", "sig"), sep = " ")
 
-diagnostic
-dim(pheno)
-dim(pheno_filt)
-unique(pheno_filt$trial)
-levels(pheno_filt$trial)
+# diagnostic
+# dim(pheno)
+# dim(pheno_filt)
+# unique(pheno_filt$trial)
+# levels(pheno_filt$trial)
 
 
 # inpheno# install.packages("ProbBreed")
 library(ProbBreed)
-head(pheno_filt)
+# head(pheno_filt)
 
-
+i=traits[3]
 
 
 
@@ -838,7 +838,7 @@ for (i in traits) {
                 res.het = TRUE,
                 iter = 4000, cores = 4, chain = 4)
   
-  
+# save(mod,file = paste0("Saves/",i,".rda"))  
 saveRDS(mod,file = paste0("Saves/",i,".rds"))
 rm(mod)
 }
@@ -846,6 +846,7 @@ rm(mod)
 
 mod_PH=readRDS("Saves/Plant Height.rds")
 mod_PL=readRDS("Saves/Plant lodging.rds")
+mod_GY=readRDS("Saves/Grain Yield.rds")
 
 
 
@@ -856,10 +857,30 @@ outs_PH = extr_outs(model = mod_PH,
 outs_PL = extr_outs(model = mod_PL,
                  probs = c(0.05, 0.95),
                  verbose = TRUE)
+outs_GY = extr_outs(model = mod_GY,
+                 probs = c(0.05, 0.95),
+                 verbose = TRUE)
 
 saveRDS(outs_PH,file = "Saves/outs_PH.rds")
 saveRDS(outs_PL,file = "Saves/outs_PL.rds")
+saveRDS(outs_GY,file = "Saves/outs_GY.rds")
 
+res_PH = prob_sup(extr = outs_PH,
+                   int = .2,
+                   increase = TRUE,
+                   save.df = FALSE,
+                   verbose = FALSE)
+res_PH = prob_sup(extr = outs_PH,
+                   int = .2,
+                   increase = TRUE,
+                   save.df = FALSE,
+                   verbose = FALSE)
+
+res_GY = prob_sup(extr = outs_GY,
+                   int = .2,
+                   increase = TRUE,
+                   save.df = TRUE,
+                   verbose = FALSE)
 
 ```
 
