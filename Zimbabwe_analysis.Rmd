@@ -160,7 +160,7 @@ write.csv(locations_unq,file = "data/loc_unq.csv",row.names = F)
 ```
 
 # Mapping the trials
-```{r}
+```{r,eval=FALSE}
 library(raster)
 library(RColorBrewer)
 
@@ -376,7 +376,7 @@ crs(pontos)<-WGS84
 # fv <- unique(pontos$regiao) 
 # (m <- match(pontos$regiao, fv)) 
 
-#########
+
 ### Plotando o mapa do Brasil 
 #
 
@@ -384,7 +384,7 @@ ggplot() +
   geom_sf(data = africa.sf)
   #scale_fill_discrete(type = c("blue",'yellow','red','magenta','green'))
 
-#########
+
 ### Plotando o mapa do Brasil  e da regiao cortada
 #
 
@@ -394,7 +394,7 @@ ggplot() +
 
 pontos.sf
 pontos
-#########
+
 ### Aproximando para a regi?o cortada
 #
 
@@ -409,7 +409,7 @@ ggplot() +
   # 
   
 
-#########
+
 ### Adicionando os rótulos de estado
 #
 
@@ -417,7 +417,7 @@ ggplot() +
   geom_sf(data = africa.sf, fill="grey") +
   theme_light()
  
-#########
+
 ### Plotando pontos
 #
 
@@ -439,7 +439,7 @@ pontos.sf
 problems <- africa.sf$ADM0_NAME[!stringi::stri_enc_isascii(africa.sf$ADM0_NAME)]
 if(length(problems) > 0) print(problems)
 
-#########
+
 ### com rasters
 #
 # install.packages("tmap")
@@ -515,6 +515,7 @@ ggsave(plot=map,device = "png",filename ="Plots/soybean_zimbabwe.png",dpi = "ret
 
 ```
 
+![](./Plots/soybean_zimbabwe.png)
 # Single-environment analyses
 
 These analyses had a purpose: to test the significance of the genetic variance in each environment. We used the following model:
@@ -685,6 +686,7 @@ saveRDS(stmt, file = "Saves/stmt.rds")
 #table(data[which(data$env=="UGN2020NAS_ST04"),"vir2"], useNA = "ifany")
 
 ```
+
 ### Results
 ```{r}
 stmt=readRDS("Saves/stmt.rds")
@@ -730,6 +732,8 @@ stvc$CV[stvc$CV == 129.7948] <- NA
 
 stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
   ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+
+data.list = split(pheno, f = pheno$trial)
 
    z = data.list[["Stapleford_2018"]]
    z = data.list[["Harare_2021"]]
@@ -897,10 +901,23 @@ save(res_GY,file = "res_GY.rda")
 
 ```
 
-
-
-# outs$ppheck
+# variances
 ```{r}
+outs_PH=readRDS("Saves/outs_PH.rds")
+outs_PL=readRDS("Saves/outs_PL.rds")
+outs_GY=readRDS("Saves/outs_GY.rds")
+
+
+outs_PH$variances$trait="PH"
+outs_PL$variances$trait="PL"
+outs_GY$variances$trait="GY"
+library(kableExtra)
+rbind(outs_PH$variances,outs_PH$variances,outs_PL$variances) |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
+```
+
+
+# density
+```{r, eval=FALSE}
 library(ProbBreed)
 library(tidyverse)
 outs_PH=readRDS("Saves/outs_PH.rds")
@@ -933,7 +950,10 @@ ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi 
 
 ```
 
-```{r}
+![](./Plots/plots_density.png)
+
+
+```{r, eval=FALSE}
 library(ProbBreed)
 library(tidyverse)
 load("Saves/res_PL.rda")
@@ -1002,7 +1022,7 @@ ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "r
 ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 6,width = 8)
 
 ```
-
+![](./Plots/plots_perfo.png)
 
 # BPSI
 ```{r}
@@ -1048,14 +1068,14 @@ plot(BPSI_soy,category = "Ranks")
 plot(BPSI_soy,category = "BPSI")
 library(kableExtra)
 
-BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE)
+
 
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
 
 # plots
-```{r}
+```{r,eval=FALSE}
 
 load("Saves/res_PL.rda")
 load("Saves/res_PH.rda")
@@ -1075,10 +1095,6 @@ names(outs) <- c("GY","LOD","CB")
 
 ```
 
-
-```{r}
-
-```
 
 
 \pagebreak
