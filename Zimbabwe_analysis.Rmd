@@ -921,9 +921,9 @@ plot(outs_PL, category = "density")
 plot(outs_GY, category = "density")
 # plot(outs_GY, category = "histogram")
 # Density: Empirical vs Sampled phenotypic values
-PL=plot(outs_PL)+ggtitle("PL")
-PH=plot(outs_PH)+ggtitle("PH")
-GY=plot(outs_GY)+ggtitle("GY")
+PL=plot(outs_PL)+ggtitle("")
+PH=plot(outs_PH)+ggtitle("")
+GY=plot(outs_GY)+ggtitle("")
 library(ggpubr)
 plot.density = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
 
