@@ -909,12 +909,15 @@ load("Saves/res_GY.rda")
 source("data/bpsi_fun.R")
 
 models= vector("list",length(3))
-names(models) <- c("GY","PH","PL")
+
+
 models[[1]] = res_GY;
 models[[2]] = res_PH
 models[[3]] = res_PL
+models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="G_55"),]
+names(models) <- c("GY","PH","PL")
+BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.2,save.df = T,verbose = T )
 
-BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = 2,int = 0.2,save.df = T,verbose = T )
 
 ```
 
@@ -938,8 +941,9 @@ plot(BPSI_soy,category = "Ranks")
 plot(BPSI_soy,category = "BPSI")
 library(kableExtra)
 
-bpsi$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE)
+BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE)
 
+BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
 

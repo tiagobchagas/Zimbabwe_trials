@@ -97,7 +97,9 @@ BPSI = function(modlist, increase = c(TRUE,FALSE,FALSE), omega, int, save.df = F
   stopifnot("Please, provide a valid vector of selection direction" !=is.null(increase))
   stopifnot("Please, provide names to the list of models" !=is.null(names(modlist)))
   stopifnot("Please, provide a list of objects from class probsup" =class(modlist[[1]])=="probsup")
-  
+  stopifnot("Please provide a list with same number of genotypes for all traits" = 
+              all(dim(modlist[[1]]$across$perfo) == dim(modlist[[2]]$across$perfo),
+                  dim(modlist[[2]]$across$perfo) == dim(modlist[[3]]$across$perfo)))
   stopifnot("Please, provide a valid selection intensity (number between 0 and 1)" = {
     is.numeric(int)
     int >= 0 & int <=1
