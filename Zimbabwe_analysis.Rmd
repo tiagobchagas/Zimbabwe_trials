@@ -934,57 +934,72 @@ ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi 
 ```
 
 ```{r}
-
+library(ProbBreed)
+library(tidyverse)
 load("Saves/res_PL.rda")
 load("Saves/res_PH.rda")
 load("Saves/res_GY.rda")
 
-head(selected)
-intersect(selected$gen,bp.sel)
-head(gen_sel)
-gen_sel_l=gen_sel |> pivot_longer(prob_gy:prob_cga:prob_pa) 
-head(gen_sel_l)
- gen_sel_l |> 
-  ggplot(aes(x = gen, y = value, 
-             fill = ifelse(gen %in% selected$gen, "selected", "non-selected"))) +
-  geom_bar(stat = "identity", position = "stack") +
-  geom_bar(data = subset(gen_sel_l, gen %in% selected$gen), 
-           stat = "identity", position = "stack", fill = "lightblue") +
-  facet_wrap(~name, scales = "free_x") + 
-  geom_text(data = subset(gen_sel_l, gen %in% selected$gen), 
-            aes(label = value), colour = "black", vjust = 1.0) +
-  theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
-    panel.background = element_blank(),
-    legend.position = "top", 
-    strip.text = element_text(size = 14)
-  ) +
-  scale_fill_manual(values = c("selected" = "lightblue",
-                               "non-selected" = "gray")) +  
-  labs(x = "Carioca common bean families", y = "Ranking", 
-       fill = expression(bold(Pr(g %in% Omega)))) +
-  theme(
-    axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
-    panel.background = element_blank(),
-    legend.position = "top", 
-    strip.text = element_text(size = 14)
-  ) + scale_y_reverse() 
+# head(selected)
+# intersect(selected$gen,bp.sel)
+# head(gen_sel)
+# gen_sel_l=gen_sel |> pivot_longer(prob_gy:prob_cga:prob_pa) 
+# head(gen_sel_l)
+#  gen_sel_l |> 
+#   ggplot(aes(x = gen, y = value, 
+#              fill = ifelse(gen %in% selected$gen, "selected", "non-selected"))) +
+#   geom_bar(stat = "identity", position = "stack") +
+#   geom_bar(data = subset(gen_sel_l, gen %in% selected$gen), 
+#            stat = "identity", position = "stack", fill = "lightblue") +
+#   facet_wrap(~name, scales = "free_x") + 
+#   geom_text(data = subset(gen_sel_l, gen %in% selected$gen), 
+#             aes(label = value), colour = "black", vjust = 1.0) +
+#   theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
+#     panel.background = element_blank(),
+#     legend.position = "top", 
+#     strip.text = element_text(size = 14)
+#   ) +
+#   scale_fill_manual(values = c("selected" = "lightblue",
+#                                "non-selected" = "gray")) +  
+#   labs(x = "Carioca common bean families", y = "Ranking", 
+#        fill = expression(bold(Pr(g %in% Omega)))) +
+#   theme(
+#     axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
+#     panel.background = element_blank(),
+#     legend.position = "top", 
+#     strip.text = element_text(size = 14)
+#   ) + scale_y_reverse() 
 
-PH$data$
+PH=plot(res_PH)
+PL=plot(res_PL)
+GY=plot(res_GY)
 
-plot(res_PL)+ggtitle("PL")+ geom_text(
-    data = subset(df, ID %in% gen.sel),  # Filter points to label
-    aes(label = ID),                     # Column containing labels
-    colour = "black",
-    vjust = 1.0
-  )
-PH=plot(res_PH)+ggtitle("PH")
-GY=plot(res_GY)+ggtitle("GY")
+library(RColorBrewer)
+RColorBrewer::brewer.pal(n=2,name = "Set1")
+display.brewer.all(n=2)
+
+PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
+fill = ifelse(PH$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
+,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
+  labs(y = "Probability of superior performance", x = "", title = "Plant Height")
+
+PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
+fill = ifelse(PL$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
+,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
+  labs(y = "Probability of superior performance", x = "", title = "Plant Lodging")
+
+GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
+fill = ifelse(GY$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
+,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
+  labs(y = "Probability of superior performance", x = "", title = "Grain Yield")
+
+
 library(ggpubr)
 plot.perfo = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
 
 
-ggsave(plot=plot.density,device = "pdf",filename ="Plots/plots_density.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 6,width = 8)
 
 ```
 
