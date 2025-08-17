@@ -744,7 +744,7 @@ stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV)
 ```
 
 ## preparing MT data
-```{r mtdata, results='hide'}
+```{r mtdata, results='hide', eval=FALSE}
 traits 
 stmt = readRDS(file = "Saves/stmt.rds")
 
@@ -789,7 +789,7 @@ met_data = do.call(rbind, mtdata); rownames(met_data) = NULL
 rm(mtdata)
 ```
 
-```{r}
+```{r, eval=FALSE}
 
 stmt = readRDS(file = "Saves/stmt.rds")
 
@@ -899,6 +899,96 @@ save(res_GY,file = "res_GY.rda")
 
 
 
+# outs$ppheck
+```{r}
+library(ProbBreed)
+library(tidyverse)
+outs_PH=readRDS("Saves/outs_PH.rds")
+outs_PL=readRDS("Saves/outs_PL.rds")
+outs_GY=readRDS("Saves/outs_GY.rds")
+
+
+outs_PH$ppcheck
+outs_PL$ppcheck
+outs_GY$ppcheck
+
+plot(outs_PH, category = "density")
+# plot(outs_PH, category = "histogram")
+
+plot(outs_PL, category = "density")
+# plot(outs_PL, category = "histogram")
+
+plot(outs_GY, category = "density")
+# plot(outs_GY, category = "histogram")
+# Density: Empirical vs Sampled phenotypic values
+PL=plot(outs_PL)+ggtitle("PL")
+PH=plot(outs_PH)+ggtitle("PH")
+GY=plot(outs_GY)+ggtitle("GY")
+library(ggpubr)
+plot.density = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
+
+
+ggsave(plot=plot.density,device = "pdf",filename ="Plots/plots_density.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi = "retina",height = 6,width = 8)
+
+```
+
+```{r}
+
+load("Saves/res_PL.rda")
+load("Saves/res_PH.rda")
+load("Saves/res_GY.rda")
+
+head(selected)
+intersect(selected$gen,bp.sel)
+head(gen_sel)
+gen_sel_l=gen_sel |> pivot_longer(prob_gy:prob_cga:prob_pa) 
+head(gen_sel_l)
+ gen_sel_l |> 
+  ggplot(aes(x = gen, y = value, 
+             fill = ifelse(gen %in% selected$gen, "selected", "non-selected"))) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_bar(data = subset(gen_sel_l, gen %in% selected$gen), 
+           stat = "identity", position = "stack", fill = "lightblue") +
+  facet_wrap(~name, scales = "free_x") + 
+  geom_text(data = subset(gen_sel_l, gen %in% selected$gen), 
+            aes(label = value), colour = "black", vjust = 1.0) +
+  theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
+    panel.background = element_blank(),
+    legend.position = "top", 
+    strip.text = element_text(size = 14)
+  ) +
+  scale_fill_manual(values = c("selected" = "lightblue",
+                               "non-selected" = "gray")) +  
+  labs(x = "Carioca common bean families", y = "Ranking", 
+       fill = expression(bold(Pr(g %in% Omega)))) +
+  theme(
+    axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
+    panel.background = element_blank(),
+    legend.position = "top", 
+    strip.text = element_text(size = 14)
+  ) + scale_y_reverse() 
+
+PH$data$
+
+plot(res_PL)+ggtitle("PL")+ geom_text(
+    data = subset(df, ID %in% gen.sel),  # Filter points to label
+    aes(label = ID),                     # Column containing labels
+    colour = "black",
+    vjust = 1.0
+  )
+PH=plot(res_PH)+ggtitle("PH")
+GY=plot(res_GY)+ggtitle("GY")
+library(ggpubr)
+plot.perfo = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
+
+
+ggsave(plot=plot.density,device = "pdf",filename ="Plots/plots_density.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi = "retina",height = 6,width = 8)
+
+```
+
+
 # BPSI
 ```{r}
 
@@ -916,11 +1006,13 @@ models[[2]] = res_PH
 models[[3]] = res_PL
 models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="G_55"),]
 names(models) <- c("GY","PH","PL")
-BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.2,save.df = T,verbose = T )
+BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.1,save.df = T,verbose = T )
 
+df=print(BPSI_soy)
+
+gen.sel = df[which(df$sel=="selected"),"gen"]
 
 ```
-
 
 # BPSI plot
 
@@ -947,6 +1039,31 @@ BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
 
+# plots
+```{r}
+
+load("Saves/res_PL.rda")
+load("Saves/res_PH.rda")
+load("Saves/res_GY.rda")
+
+res_PL$across$stabi
+
+
+models=list(mod,mod2,mod3)
+#models <- vector("list",length(mods))
+names(models) <- c("GY","LOD","CB")
+#str(models)
+outs= vector("list",length(models))
+names(outs) <- c("GY","LOD","CB")
+
+
+
+```
+
+
+```{r}
+
+```
 
 
 \pagebreak
