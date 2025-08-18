@@ -161,140 +161,6 @@ write.csv(locations_unq,file = "data/loc_unq.csv",row.names = F)
 
 # Mapping the trials
 ```{r,eval=FALSE}
-library(raster)
-library(RColorBrewer)
-
-#Escolha sua pasta de trabalho Control+Shift + H
-
-#Importando o Brasil
-Africa<- shapefile('data/Africa_Biomes_Dataset.shp')
-Africa
-
-#plot(brasil, axes=T, main= 'Brasil')
-
-
-WGS84<-CRS("+proj=longlat +datum=WGS84 +no_defs ") #
-
-
-# reg <- unique(brasil@data$REGIAO) #Obtendo o nome das regi?es
-# (mreg <- match(brasil@data$REGIAO, reg))
-# text(brasil, 'UF', cex=.6, halo=TRUE)
-
-
-#Pacote Brewer Pal 
-display.brewer.all(colorblindFriendly=T)
-
-(paleta.colbrewer<-brewer.pal('Blues', n=5))
-#paleta<- c("blue","red","green","magenta","yellow")
-
-#plot(brasil, col=paleta[mreg], axes=T)
-plot(Africa, col=paleta.colbrewer, axes=T)
-text(brasil, 'UF', cex=.6, halo=TRUE)
-
-pontos<- read.csv("data/loc_unq.csv", header=TRUE, sep=',') # se estiver usando outro OS
-table(pontos$SITE_LONG)
-head(pontos)
-tail(pontos)
-str(pontos)
-# pontos[which(pontos$latitude < -23),]
-# pontos[which(pontos$Instituicao=="CATI/Avare"),"regiao"]="SE"
-# pontos[which(pontos$Instituicao=="DETEC/Itai"),"regiao"]="SE"
-# pontos[which(pontos$cidade=="Campos Novos"),"regiao"]="SU"
-
-
-
-# Apply to your data (5 decimal rounding)
-pontos$SITE_LAT <- smart_clean_coords(pontos$SITE_LAT)
-pontos$SITE_LONG <- smart_clean_coords(pontos$SITE_LONG)
-
-# Check results
-head(pontos)
-tail(pontos)
-
-coordinates(pontos)<- ~ SITE_LONG + SITE_LAT
-
-WGS84<-CRS("+proj=longlat +datum=WGS84 +no_defs ") #
-#plot(pontos,pch=20,cex=0.5, add=T)
-crs(pontos)<-WGS84
-
-
-# fv <- unique(pontos$regiao) 
-# (m <- match(pontos$regiao, fv)) 
-plot(pontos, bg=rainbow(4),pch=21, cex=0.75,add=T) 
-
-#inserindo legenda
-legend("bottomright",title ='Regions' ,legend = fv,cex = 1,x.intersp = 1,pch = 21, pt.cex = 2,pt.bg = rainbow(4))
-
-
-#EXTRAS
-#Plotando o norte
-library(png)
-library(grid)
-
-norte<- readPNG('Norte.png')
-grid.raster(norte, x=.7, y=0.8, width=.05)
-
-#Escala
-scalebar(d=5000,type='bar',divs=4)
-
-agro<- raster('data/agro.tif') # Importando o Raster de elevação
-hwsd <- raster('data/hwsd.tif')
-
-plot(hwsd, main="Elevation") # Plotando o Raster de elevação
-plot(agro, main="agro",col=rainbow(30))
-
-palete.spec<- brewer.pal("Spectral",n=11)
-plot(agro, main="Elevation", col= rev(palete.spec)) 
-
-plot(africa, add=TRUE) #Adicionando o mapa do brasil
-
-
-#Selecionando os estados
-
-#brasil[LINHA , COLUNA]
-# brasil
-# 
-# uf<- brasil[brasil@data$UF %in% c('MT','GO','RS','PE','BA','ES','DF',
-#             'RJ','AL','SE','MG','MS','SP','PR','SC'),] #Mesma indexacao de data.frame
-# uf
-# 
-# plot(uf, col='orange')
-# plot(uf, col=c("red","blue"))
-# text(uf,'UF', cex=1, halo=T)
-
-#Cortando um raster para o estado
-
-#for( i in 1:5){
-agro_crop<- crop(agro,pontos)
-plot(agro_crop)
-hwsd_crop<- crop(hwsd,pontos)
-plot(hwsd_crop)
-
-# elev_uf<-mask(elev_uf,uf)
-# plot(elev_uf, col=rev(palete.spec))
-
-writeRaster(elev_uf,filename= "./UF_elev", overwrite=TRUE)
-writeRaster(elev_uf,filename= "./UF_elev", overwrite=TRUE)
-#raster::writeRaster(elev_uf,filename = paste0('Raster/r',i))
-#}
-
-
-plot(pontos, bg=rainbow(4)[m],pch=21, cex=0.75,axes=T,add=T) 
-
-
-#Juntando tudo
-#plot(uf, col='orange',axes=TRUE)
-plot(elev_uf, col=rev(palete.spec), legend=F)
-plot(brasil, add=T)
-plot(pontos, bg=rainbow(4)[m],pch=21, cex=0.75,axes=T,add=T) 
-legend("bottomright",pch=21,pt.cex=2, pt.bg=rainbow(4),legend = fv,cex = 1,y.intersp = 1.1, title = 'Brazillian regions',inset =0.01 )
-text(brasil, 'UF', cex=.6, halo=TRUE)
-
-```
-
-
-## ggplot2
-```{r,eval=FALSE}
 #Com ggplot2
 
 # elevação
@@ -747,51 +613,7 @@ data.list = split(pheno, f = pheno$trial)
    stvc |> mutate(CV = case_when(CV == 948.7212~NA))
 ```
 
-## preparing MT data
-```{r mtdata, results='hide', eval=FALSE}
-traits 
-stmt = readRDS(file = "Saves/stmt.rds")
-
-str(stmt$Banket_2019)
-stmt$Banket_2019$Blues$`Plant lodging`
-i
-stmt$Banket_2018$Blues$`Plant lodging`$
-mtdata = list()
-diagnostic
-
-#i="Banket_2018"
-#j="Plant lodging"
-stmt$Banket_2018$Blues
-for (i in names(stmt)) {
-  mtdata[[i]] = stmt[[i]][["Blues"]][["Plant lodging"]][,-c(3,4)]
-  if(is.null(mtdata[[i]])){
-    mtdata[[i]] = stmt[[i]][["Blues"]][[j]][,-c(3,4)]
-    colnames(mtdata[[i]]) = c("geno", j, paste('w',j,sep = "_"))
-  mtdata[[i]]$env = i
-  mtdata[[i]] = mtdata[[i]][,c("geno","env",j, paste('w',j,sep = "_"))]
-  }else{
-  colnames(mtdata[[i]]) = c("geno", "Plant lodging", "w_Plant lodging")
-  mtdata[[i]]$env = i
-  mtdata[[i]] = mtdata[[i]][,c("geno","env","Plant lodging", "w_Plant lodging")]
-    }
-  for (j in traits.sel[-1]) {
-    if(print(all(mtdata$geno == stmt[[i]][["Blues"]][[j]][,1]))) cat("The names match", fill = TRUE)
-    
-    mtdata[[i]][,c(j, paste('w',j,sep = "_"))] = stmt[[i]][["Blues"]][[j]][,c(2,5)]
-
-  }
-}
-
-mtdata[[3]]$vir2=NA
-mtdata[[3]]$w_vir2=NA
-mtdata[[5]]$rytha=NA
-mtdata[[5]]$w_rytha=NA
-mtdata[[5]]=mtdata[[5]][,c("geno", "env" ,"Plant lodging", "w_Plant lodging" ,"Plant Height", "w_Plant Height" , "Grain Yield","w_Grain Yield")]
-
-met_data = do.call(rbind, mtdata); rownames(met_data) = NULL
-
-rm(mtdata)
-```
+## Filter env which has significance to genotype effect
 
 ```{r, eval=FALSE}
 
@@ -901,7 +723,7 @@ save(res_GY,file = "res_GY.rda")
 
 ```
 
-# variances
+# Variances
 ```{r}
 outs_PH=readRDS("Saves/outs_PH.rds")
 outs_PL=readRDS("Saves/outs_PL.rds")
@@ -911,8 +733,12 @@ outs_GY=readRDS("Saves/outs_GY.rds")
 outs_PH$variances$trait="PH"
 outs_PL$variances$trait="PL"
 outs_GY$variances$trait="GY"
-library(kableExtra)
-rbind(outs_PH$variances,outs_PH$variances,outs_PL$variances) |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
+
+varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances) 
+varcomp$type=ifelse()
+library(tidyverse)
+head(varcomp)
+varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") + facet_wrap(~trait,scales="free")
 ```
 
 
