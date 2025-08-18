@@ -613,10 +613,10 @@ data.list = split(pheno, f = pheno$trial)
    stvc |> mutate(CV = case_when(CV == 948.7212~NA))
 ```
 
-## Filter env which has significance to genotype effect
+# Bayesian model
 
 ```{r, eval=FALSE}
-
+# Filter env which has significance to genotype effect
 stmt = readRDS(file = "Saves/stmt.rds")
 
 diagnostic = do.call(rbind, lapply(stmt, function(x){
@@ -638,13 +638,13 @@ diagnostic = do.call(rbind, lapply(stmt, function(x){
 library(ProbBreed)
 # head(pheno_filt)
 
-i=traits[1]
+i=traits[3]
 
 # Getting the path of your current open file
 current_path = rstudioapi::getActiveDocumentContext()$path 
 setwd(dirname(current_path ))
 print( getwd() )
-
+head(pheno)
 for (i in traits) {
   message(paste("Analysis to", i))
   # print(paste("Analysis to", i)) 
@@ -662,12 +662,12 @@ for (i in traits) {
                 repl = c("rep"),
                 trait = paste(i),
                 reg = NULL,
-                year = NULL,
+                year = "CROP_SEASON",
                 res.het = TRUE,
                 iter = 4000, cores = 4, chain = 4)
   
 #save(mod,file = paste0("Saves/",i,".rda"))  
-saveRDS(mod,file = paste0("Saves/",i,".rds"))
+saveRDS(mod,file = paste0("Saves/",i,"_year.rds"))
 rm(mod)
 }
 
