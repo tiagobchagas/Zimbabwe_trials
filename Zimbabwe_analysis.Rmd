@@ -24,26 +24,26 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("stars")
 library(tidyverse) 
 data <- read.csv("data/Zimbabwe.csv",header = T,sep = ";")
-colnames(data)
-head(data)
+# colnames(data)
+# head(data)
 pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)] 
 table(pheno$LOCATION_NAME)
 colnames(pheno)
 pheno$geno <- gsub(" ", "_",pheno$Crop_Variety)
 pheno$geno <- factor(pheno$geno)
-unique(pheno$IRRIGATION)
+# unique(pheno$IRRIGATION)
 levels(pheno$geno) <- paste("G", 1:length(levels(pheno$geno)), sep = "_")
-table(pheno$Crop_Variety)
-table(pheno$geno)
+# table(pheno$Crop_Variety)
+# table(pheno$geno)
 
 pheno[which(pheno$HARV_DATE==""),"LOCATION_NAME"]
 
 pheno$DTH <- as.Date(as.character(pheno$HARV_DATE), format="%m/%d/%Y")-
                   as.Date(as.character(pheno$PLANT_DATE), format="%m/%d/%Y")-5
-dim(pheno)
-colnames(pheno)
-head(pheno)
-str(pheno)
+# dim(pheno)
+# colnames(pheno)
+# head(pheno)
+# str(pheno)
 pheno$GRAIN_YLD_13PCT <-  gsub(",", ".", pheno$GRAIN_YLD_13PCT)
 trial <-  gsub("_.*", "", pheno$LOCATION_NAME)
 pheno$trial <- paste0(trial,"_", pheno$CROP_SEASON)
@@ -69,8 +69,8 @@ pheno[, factors] <- lapply(pheno[, factors], as.factor)
 head(pheno)
 
 #Irrigation system
-table(pheno$trial,pheno$IRRIGATION, useNA = "ifany")
-unique(pheno$IRRIGATION)
+# table(pheno$trial,pheno$IRRIGATION, useNA = "ifany")
+# unique(pheno$IRRIGATION)
 pheno[which(pheno$trial=="Banket_2019"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Banket_2020"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Bindura_2020"),"IRRIGATION"] <- "Rainfed"
@@ -83,10 +83,10 @@ pheno[which(pheno$trial==" Mutare_2020"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Stapleford_2019"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Stapleford_2020"),"IRRIGATION"] <- "Rainfed"
 
-table(pheno$IRRIGATION)
-
-
-levels(pheno$IRRIGATION)
+# table(pheno$IRRIGATION)
+# 
+# 
+# levels(pheno$IRRIGATION)
 ```
 
 
@@ -96,7 +96,7 @@ levels(pheno$IRRIGATION)
 ```{r}
 
 pheno_long <- reshape2::melt(pheno, measure.vars = traits, variable.name = "trait") #transformando o pheno em formato longo
-head(pheno_long)
+# head(pheno_long)
 
 ggplot(pheno_long, aes(x = trait, y = value, color = trait)) + geom_boxplot(outlier.shape = NA)+
     geom_point(alpha = 0.2, position = "jitter", size = 1) + facet_grid(trait~LOCATION_NAME,
@@ -641,10 +641,10 @@ library(ProbBreed)
 i=traits[3]
 
 # Getting the path of your current open file
-current_path = rstudioapi::getActiveDocumentContext()$path 
-setwd(dirname(current_path ))
-print( getwd() )
-head(pheno)
+# current_path = rstudioapi::getActiveDocumentContext()$path 
+# setwd(dirname(current_path ))
+# print( getwd() )
+# head(pheno)
 for (i in traits) {
   message(paste("Analysis to", i))
   # print(paste("Analysis to", i)) 
@@ -677,53 +677,38 @@ mod_PH=readRDS("Saves/Plant Height.rds")
 mod_PL=readRDS("Saves/Plant lodging.rds")
 mod_GY=readRDS("Saves/Grain Yield.rds")
 
+ 
 
-
-outs_PH = extr_outs(model = mod_PH,
-                 probs = c(0.05, 0.95),
-                 verbose = TRUE)
-
-outs_PL = extr_outs(model = mod_PL,
-                 probs = c(0.05, 0.95),
-                 verbose = TRUE)
-outs_GY = extr_outs(model = mod_GY,
-                 probs = c(0.05, 0.95),
-                 verbose = TRUE)
-
-saveRDS(outs_PH,file = "Saves/outs_PH.rds")
-saveRDS(outs_PL,file = "Saves/outs_PL.rds")
-saveRDS(outs_GY,file = "Saves/outs_GY.rds")
-
-setwd("./Saves/PH")
+# setwd("./Saves/PH")
 res_PH = prob_sup(extr = outs_PH,
                    int = .2,
                    increase = FALSE,
                    save.df = FALSE,
                    verbose = FALSE)
-setwd("../PL")
+# setwd("../PL")
 
 res_PL = prob_sup(extr = outs_PL,
                    int = .2,
                    increase = FALSE,
                    save.df = FALSE,
-                   verbose = TRUE)
-setwd("../GY")
+                   verbose = FALSE)
+# setwd("../GY")
 
 res_GY = prob_sup(extr = outs_GY,
                    int = .2,
                    increase = TRUE,
-                   save.df = TRUE,
+                   save.df = FALSE,
                    verbose = FALSE)
 
-setwd("../")
+# setwd("../")
 
-save(res_PL,file = "res_PL.rda")
-save(res_PH,file = "res_PH.rda")
-save(res_GY,file = "res_GY.rda")
+save(res_PL,file = "Saves/res_PL_year.rda")
+save(res_PH,file = "Saves/res_PH_year.rda")
+save(res_GY,file = "Saves/res_GY_year.rda")
 
 ```
 
-# Variances
+## Variances
 ```{r}
 outs_PH=readRDS("Saves/outs_PH.rds")
 outs_PL=readRDS("Saves/outs_PL.rds")
@@ -735,87 +720,106 @@ outs_PL$variances$trait="PL"
 outs_GY$variances$trait="GY"
 
 varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances) 
-varcomp$type=ifelse()
+
+library(tidyverse)
+head(varcomp)
+varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") + facet_wrap(~trait,scales="free")
+```
+
+```{r}
+outs_PH=readRDS("Saves/outs_PH_year.rds")
+outs_PL=readRDS("Saves/outs_PL_year.rds")
+outs_GY=readRDS("Saves/outs_GY_year.rds")
+
+
+outs_PH$variances$trait="Plant Height"
+outs_PL$variances$trait="Plant Lodging"
+outs_GY$variances$trait="Grain Yield"
+
+varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances) 
+
 library(tidyverse)
 head(varcomp)
 varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") + facet_wrap(~trait,scales="free")
 ```
 
 
-# density
+## Density
 ```{r, eval=FALSE}
 library(ProbBreed)
 library(tidyverse)
-outs_PH=readRDS("Saves/outs_PH.rds")
-outs_PL=readRDS("Saves/outs_PL.rds")
-outs_GY=readRDS("Saves/outs_GY.rds")
+outs_PH=readRDS("Saves/outs_PH_year.rds")
+outs_PL=readRDS("Saves/outs_PL_year.rds")
+outs_GY=readRDS("Saves/outs_GY_year.rds")
 
 
 outs_PH$ppcheck
 outs_PL$ppcheck
 outs_GY$ppcheck
 
-plot(outs_PH, category = "density")
+# plot(outs_PH, category = "density")
 # plot(outs_PH, category = "histogram")
 
-plot(outs_PL, category = "density")
+# plot(outs_PL, category = "density")
 # plot(outs_PL, category = "histogram")
 
-plot(outs_GY, category = "density")
+# plot(outs_GY, category = "density")
 # plot(outs_GY, category = "histogram")
 # Density: Empirical vs Sampled phenotypic values
-PL=plot(outs_PL)+ggtitle("")
+PL=plot(outs_PL)+ggtitle("")+ labs(x="Plant Lodging")
 PH=plot(outs_PH)+ggtitle("")
 GY=plot(outs_GY)+ggtitle("")
 library(ggpubr)
-plot.density = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
+plot.density = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T)
 
 
 ggsave(plot=plot.density,device = "pdf",filename ="Plots/plots_density.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi = "retina",height = 6,width = 8,bg = "white")
 
 ```
 
 ![](./Plots/plots_density.png)
 
 
+## Probsup within locations
+```{r,eval=FALSE}
+
+load("Saves/res_PL_year.rda")
+load("Saves/res_PH_year.rda")
+load("Saves/res_GY_year.rda")
+
+
+ls()
+
+GY=plot(res_GY, category = "perfo", level = "within")
+PH=plot(res_PH, category = "perfo", level = "within")
+PL=plot(res_PL, category = "perfo", level = "within")
+
+GY=GY+ theme(axis.text.y = element_text(size=3,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Grain Yield")
+PH=PH+ theme(axis.text.y = element_text(size=3, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")
+PL=PL+ theme(axis.text.y = element_text(size=3, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")
+
+plot.within = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol=3, common.legend = T)
+
+
+ggsave(plot=plot.within,device = "pdf",filename ="Plots/plots_perfo_within.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",dpi = "retina",height = 6,width = 8,bg = "white")
+
+
+
+```
+![](./Plots/plots_perfo_within.png)
+
+## Probsup across locations
 ```{r, eval=FALSE}
 library(ProbBreed)
 library(tidyverse)
-load("Saves/res_PL.rda")
-load("Saves/res_PH.rda")
-load("Saves/res_GY.rda")
+load("Saves/res_PL_year.rda")
+load("Saves/res_PH_year.rda")
+load("Saves/res_GY_year.rda")
 
-# head(selected)
-# intersect(selected$gen,bp.sel)
-# head(gen_sel)
-# gen_sel_l=gen_sel |> pivot_longer(prob_gy:prob_cga:prob_pa) 
-# head(gen_sel_l)
-#  gen_sel_l |> 
-#   ggplot(aes(x = gen, y = value, 
-#              fill = ifelse(gen %in% selected$gen, "selected", "non-selected"))) +
-#   geom_bar(stat = "identity", position = "stack") +
-#   geom_bar(data = subset(gen_sel_l, gen %in% selected$gen), 
-#            stat = "identity", position = "stack", fill = "lightblue") +
-#   facet_wrap(~name, scales = "free_x") + 
-#   geom_text(data = subset(gen_sel_l, gen %in% selected$gen), 
-#             aes(label = value), colour = "black", vjust = 1.0) +
-#   theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
-#     panel.background = element_blank(),
-#     legend.position = "top", 
-#     strip.text = element_text(size = 14)
-#   ) +
-#   scale_fill_manual(values = c("selected" = "lightblue",
-#                                "non-selected" = "gray")) +  
-#   labs(x = "Carioca common bean families", y = "Ranking", 
-#        fill = expression(bold(Pr(g %in% Omega)))) +
-#   theme(
-#     axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5),
-#     panel.background = element_blank(),
-#     legend.position = "top", 
-#     strip.text = element_text(size = 14)
-#   ) + scale_y_reverse() 
 
+#
 PH=plot(res_PH)
 PL=plot(res_PL)
 GY=plot(res_GY)
@@ -827,21 +831,21 @@ display.brewer.all(n=2)
 PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
 fill = ifelse(PH$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "Probability of superior performance", x = "", title = "Plant Height")
+  labs(y = "", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
 
 PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
 fill = ifelse(PL$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "Probability of superior performance", x = "", title = "Plant Lodging")
+  labs(y = "", x = "", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
 
 GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
 fill = ifelse(GY$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "Probability of superior performance", x = "", title = "Grain Yield")
+  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
 
 
 library(ggpubr)
-plot.perfo = ggarrange(PH,PL,GY,labels = c("A","B","C"),nrow = 3, common.legend = T)
+plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T)
 
 
 ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 6,width = 8)
@@ -849,13 +853,41 @@ ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "r
 
 ```
 ![](./Plots/plots_perfo.png)
+## Probsup across locations pairwise
+```{r,eval=FALSE}
 
+load("Saves/res_PL_year.rda")
+load("Saves/res_PH_year.rda")
+load("Saves/res_GY_year.rda")
+
+
+ls()
+
+GY=plot(res_GY, category = "pair_perfo")
+PH=plot(res_PH, category = "pair_perfo")
+PL=plot(res_PL, category = "pair_perfo")
+
+GY=GY+ theme(axis.text.x = element_text( color = ifelse(GY$data$y %in% gen.sel,  "#E41A1C", "black")))+ labs( title = "Grain Yield")
+PH=PH+ theme(axis.text.x = element_text( color = ifelse(PH$data$y %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")
+PL=PL+ theme(axis.text.x = element_text( color = ifelse(PL$data$y %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")
+
+plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T)
+
+
+ggsave(plot=plot.pair,device = "pdf",filename ="Plots/plots_pair.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.pair,device = "png",filename ="Plots/plots_pair.png",dpi = "retina",height = 6,width = 8, bg = "white")
+
+
+
+```
+
+![](./Plots/plots_pair.png)
 # BPSI
 ```{r}
 
-load("Saves/res_PL.rda")
-load("Saves/res_PH.rda")
-load("Saves/res_GY.rda")
+load("Saves/res_PL_year.rda")
+load("Saves/res_PH_year.rda")
+load("Saves/res_GY_year.rda")
 
 source("data/bpsi_fun.R")
 
@@ -900,26 +932,6 @@ BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
 
-# plots
-```{r,eval=FALSE}
-
-load("Saves/res_PL.rda")
-load("Saves/res_PH.rda")
-load("Saves/res_GY.rda")
-
-res_PL$across$stabi
-
-
-models=list(mod,mod2,mod3)
-#models <- vector("list",length(mods))
-names(models) <- c("GY","LOD","CB")
-#str(models)
-outs= vector("list",length(models))
-names(outs) <- c("GY","LOD","CB")
-
-
-
-```
 
 
 

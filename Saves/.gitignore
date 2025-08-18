@@ -7,3 +7,9 @@ Grain Yield.rds
 outs_GY.rds
 Plant lodging.rda
 Saves/Plant Height.rds
+outs_GY_year.rds
+outs_PH_year.rds
+outs_PL_year.rds
+Grain Yield_year.rds
+Plant Height_year.rds
+Plant lodging_year.rds
