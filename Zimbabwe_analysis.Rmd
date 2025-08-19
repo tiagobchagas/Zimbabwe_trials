@@ -740,10 +740,11 @@ varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances)
 
 library(tidyverse)
 head(varcomp)
-vc=varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") + facet_wrap(~trait,scales="free")
+vc=varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") +
+ geom_errorbar(aes(ymin = var-sd,ymax=var+sd),width=0.1)+ facet_wrap(~trait,scales="free")
 
-ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=vc,device = "png",filename ="Plots/varcomp.png",dpi = "retina",height = 6,width = 8,bg = "white")
+ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp1.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=vc,device = "png",filename ="Plots/varcomp1.png",dpi = "retina",height = 6,width = 8,bg = "white")
 
 ```
 
