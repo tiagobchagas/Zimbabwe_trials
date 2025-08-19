@@ -127,20 +127,22 @@ where $\hat{g}_i$ is the genotypic value, $\Omega$ is a subset of genotypes with
 ## Material and methods
 
 ### Bayesian Probabilistic Selection Index
-
+::: {.fragment data-fragment-index=1}
 $$ BPSI_i = \sum_{m=1}^{t} \frac{RankProbSup^t}{\omega^t} $$
 
 	
 where $t$ is the total number of traits evaluated $(m =1, 2,…,t)$ and $\omega$ is a weight. Traits of greater interest will have larger $\omega$. We used weight 2 for GY and weight 1 for PH and PL. The 10% best-ranked families were selected according to the BPSI.
+:::
 
 
+::: {.fragment data-fragment-index=2}
 | Genotype | T1(Rank) | T2(Rank) | T3(Rank) | PSI       |
 |----------|----------|----------|----------|-----------|
 | 1        | 10       | 5        | 2        | ∑ i.= 17  |
 | 2        | 5        | 3        | 10       | ∑ i.= 18  |
 | 3        | 7        | 3        | 10       | ∑ i.= 19  |
 
-
+:::
 
 
 ## Results
