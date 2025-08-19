@@ -143,7 +143,7 @@ where $t$ is the total number of traits evaluated $(m =1, 2,…,t)$ and $\omega$
 
 
 
-## Resultados
+## Results
 
 ```{r, include=FALSE}
 library(tidyverse) 
@@ -193,7 +193,7 @@ datavis1=ggplot(pheno_long, aes(x = trait, y = value, color = trait)) + geom_box
 
 ```
 
-## Resultados
+## Results
 ```{r}
 library(ggh4x)
 library(ggpmisc)
@@ -203,7 +203,7 @@ data_vis=ggplot(data = pheno_long, aes(x=trait, y= value, color=trait)) +
   theme_bw()+theme(axis.text.x = element_text(angle=90));data_vis
 ```
 
-## Resultados
+## Results
 ```{r}
 stmt=readRDS("../Saves/stmt.rds")
 
@@ -251,7 +251,7 @@ stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>
 
 
 
-## Resultados
+## Results
 
 ```{r}
 stvc$CV[stvc$CV == 948.7212] <- NA
@@ -264,7 +264,7 @@ stvc$CV[stvc$CV == 129.7948] <- NA
 
 ```
 
-## Resultados
+## Results
 
 ```{r}
 stvc$CV[stvc$CV == 99.4859] <- NA
@@ -274,6 +274,8 @@ stvc$CV[stvc$CV == 99.4859] <- NA
 
 
 ```
+
+## Bay
 
 ## Perguntas?
 
