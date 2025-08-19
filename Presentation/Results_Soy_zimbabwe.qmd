@@ -1,0 +1,283 @@
+---
+title: "Selection of superior soybean genotypes across locations and years in Zimbabwe according to multitrait ideotype"
+author: 
+- Chagas, J.T.B
+- Araújo, M.S.
+- Pinheiro, J.B.
+format:
+  revealjs:
+    theme: simple
+    width: 1600
+    height: 900
+    incremental: true
+    highlight-style: arrow
+    transition: slide
+    code-tools:
+      source: true
+      toggle: true
+      caption: none
+    code-overflow: wrap
+    footer: "DGM Lab"
+    logo: "../misc/esalq_hor.png"
+    embed-resources: true
+    slide-number: c/t
+    title-slide-attributes:
+      data-background-image: "../misc/dgm.jpeg"
+      data-background-opacity: "1"
+      data-background-size: "50%"
+      data-background-position: "bottom"
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
+---
+
+## Introduction
+
+::: {.callout-warning .justify icon="true" title="Question"}
+How to select superior soybean genotypes across locations and years (GxE interaction) according to Multitrait ideotype? (Simultaneous selection)
+
+:::
+
+. . .
+
+::: {.callout-tip .justify icon="true" title="Hypothesis"}
+Estimate probability of superior performance [@Dias2022] across seasons and years and
+classify genotypes using Bayesian Probabilistic Selection Index [@Chagas2025]
+
+:::
+
+## Goal
+::: {.callout-important .justify icon="true" title=""}
+Select superior soybean genotypes to grain yield, plant height and plant lodging using Bayesian probabilistic selection index (BPSI) [@Chagas2025]
+
+:::
+
+
+
+## Material e Métodos
+::::: {layout="[ 70, 30 ]"}
+![Ensaios experimentais](../Plots/soybean_zimbabwe.png){fig-align=left width=2500 heigth=2500}
+
+::: {#sec-column}
+- 14 locations
+- 6 years
+- 41 trials
+- 98 genotypes
+- 3 traits (Grain Yield, Plant Height, Plant Lodging)
+- Randomized complete block design (RCB)
+:::
+:::::
+
+## Material e Métodos
+
+Individual analyses
+
+$$
+ \mathbf{y} = \mathbf{X_1b} + \mathbf{Z_1g} + \mathbf{\epsilon} 
+$$
+
+onde $\mathbf{y}$ é o vetor das observações fenotípicas, $\mathbf{b}$ é o vetor dos efeitos fixos de repetição, $\mathbf{g}$ é o vetor dos efeitos aleatórios de genótipo e $\mathbf{\epsilon}$ é o vetor dos efeitos residuais. $\mathbf{X_1}$, $\mathbf{X_2}$ e $\mathbf{Z_1}$ são matrizes de incidência dos  efeitos $\mathbf{b}$ e $\mathbf{g}$ respectivamente.
+
+## Material e Métodos
+
+### Herdabilidade 
+
+$$
+h^2 = \sigma^2g    / \sigma^2g + \sigma^2e
+$$
+
+onde $\sigma^2g$ é a variância genética e $\sigma_e^2$ é a variância do erro.
+
+### Coeficiente de Variação Experimental
+
+$$
+CV = \frac{\sigma_e}{\mu} \times 100
+$$
+
+onde $\mu$ é a média da característica.
+
+## Material e Métodos
+### Teste de razão de verossimilhança
+
+$$LRT= −2 \times (Log𝐿 - Log L_𝑅)$$
+
+onde $L$ é o ponto máximo da função de verossimilhança restrita do modelo completo e $L_R$ é o mesmo para o modelo reduzido, ou seja, sem o efeito a ser testado. O valor de LRT foi comparado com o valor tabulado com base na tabela qui-quadrado, a um grau de liberdade e probabilidade de 0,95.
+
+## Material and Methods
+### Bayesian model
+$$
+y_{jkhp} = \mu + t_h + l_k + b_{p(k)} + g_j + gl_{jk} + gt_{jh} + \varepsilon_{jkhp}
+$$
+where the $y_{jkhp}$  is the phenotypic record of the $j^{th}$ genotype, allocated in the $ p^{th}$block, in the $k^{th}$ location and in the year $t_{th}$. All other effects were previously defined but $b_{p(k)}$, which is the effect of the $p^{th}$ block in the $k{th}$ location, and $gl^{jk}$ , which correspond to the genotype-by-location interaction $t_h$ and $t_{jh}$  are the main effect of years and the genotypes-by-years interaction effect, respectively.
+
+## Material and Methods
+
+### Probability of superior performance
+
+BPSI index uses the probability of superior performance to estimate the chance of a genotype being selected in multienvironmental trials [@Dias2022].
+
+	
+$$ 
+Pr\left({\hat{g}}_i \in \Omega \middle| y\right) = \frac{1}{s}\sum_{s=1}^{s} I \left({\hat{g}}_i^{(s)} \in \Omega \middle| y\right) 
+$$
+
+
+where $\hat{g}_i$ is the genotypic value, $\Omega$ is a subset of genotypes with superior performance and $s$ represents each sample of posterior distribution.
+
+## Material and methods
+
+### Bayesian Probabilistic Selection Index
+
+$$ BPSI_i = \sum_{m=1}^{t} \frac{RankProbSup^t}{\omega^t} $$
+
+	
+where $t$ is the total number of traits evaluated $(m =1, 2,…,t)$ and $\omega$ is a weight. Traits of greater interest will have larger $\omega$. We used weight 2 for GY and weight 1 for PH and PL. The 10% best-ranked families were selected according to the BPSI.
+
+
+| Genotype | T1(Rank) | T2(Rank) | T3(Rank) | PSI       |
+|----------|----------|----------|----------|-----------|
+| 1        | 10       | 5        | 2        | ∑ i.= 17  |
+| 2        | 5        | 3        | 10       | ∑ i.= 18  |
+| 3        | 7        | 3        | 10       | ∑ i.= 19  |
+
+
+
+
+## Resultados
+
+```{r, include=FALSE}
+library(tidyverse) 
+data <- read.csv("../data/Zimbabwe.csv",header = T,sep = ";")
+
+pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)] 
+
+
+pheno$geno <- gsub(" ", "_",pheno$Crop_Variety)
+
+
+pheno[which(pheno$HARV_DATE==""),"LOCATION_NAME"]
+
+pheno$DTH <- as.Date(as.character(pheno$HARV_DATE), format="%m/%d/%Y")-
+                  as.Date(as.character(pheno$PLANT_DATE), format="%m/%d/%Y")-5
+
+pheno$GRAIN_YLD_13PCT <-  gsub(",", ".", pheno$GRAIN_YLD_13PCT)
+trial <-  gsub("_.*", "", pheno$LOCATION_NAME)
+pheno$trial <- paste0(trial,"_", pheno$CROP_SEASON)
+
+
+pheno <- pheno |> rename("Plant Height"=8, "Grain Yield"=9, "Plant lodging"=7, "rep"=4)
+
+traits <- c(colnames(pheno)[c(7,8,9)])
+
+pheno[, traits] <- lapply(pheno[, traits], as.numeric)
+
+factors <- c(colnames(pheno)[c(1,2,3,4,5,6,14,15,16,17)])
+
+
+
+traits <- c(colnames(pheno)[c(7,8,9)])
+
+
+pheno[, factors] <- lapply(pheno[, factors], as.factor)
+
+pheno$LOCATION_NAME <- substr(pheno$LOCATION_NAME, 1, 7)   
+pheno$CROP_SEASON <- substr(pheno$CROP_SEASON, 3, 4)   
+pheno_long <- reshape2::melt(pheno, measure.vars = traits, variable.name = "trait") #transformando o pheno em formato longo
+```
+
+
+```{r}
+datavis1=ggplot(pheno_long, aes(x = trait, y = value, color = trait)) + geom_boxplot(outlier.shape = NA)+    geom_point(alpha = 0.2, position = "jitter", size = 1) + facet_grid(trait~LOCATION_NAME,
+    scales = "free_y") + theme_bw() + theme(axis.text.x = element_text(angle=90));datavis1
+
+
+```
+
+## Resultados
+```{r}
+library(ggh4x)
+library(ggpmisc)
+data_vis=ggplot(data = pheno_long, aes(x=trait, y= value, color=trait)) +
+  geom_boxplot() +
+  geom_point( position = "jitter", alpha = 0.5) +  facet_nested(trait~LOCATION_NAME+CROP_SEASON, scales = "free_y") +
+  theme_bw()+theme(axis.text.x = element_text(angle=90));data_vis
+```
+
+## Resultados
+```{r}
+stmt=readRDS("../Saves/stmt.rds")
+
+stvc=lapply(stmt, function(x)as.data.frame(cbind(x$summary)))
+
+#stvc.df=lapply(stmti, function(x)as.data.frame(cbind(x$vc)))
+
+
+
+#stmt[[1]][["Blues"]][[1]][,-c(3,4)]
+
+
+stvc=do.call(rbind,stvc)
+stvc$trait=rownames(stvc)
+stvc$env=sub("\\..*","",stvc$trait)
+stvc$trait = sub(".*\\.","",stvc$trait)
+stvc$geno_sig=sub("^\\S+\\s+","",stvc$geno)
+stvc$geno=sub("\\s.*","",stvc$geno)
+stvc$geno= as.numeric(stvc$geno)
+stvc$H2=as.numeric(stvc$H2)
+stvc$error=as.numeric(stvc$error)
+stvc$CV=as.numeric(stvc$CV)
+library(tidyverse)
+
+stvcl= stvc |> select(geno, error, trait, env, geno_sig) |> pivot_longer(geno:error) 
+
+stvcl$year=gsub(".*_", "", stvcl$env)  
+stvcl$env=gsub("_.*", "", stvcl$env)  
+stvcl$year <- substr(stvcl$year,3,4)
+
+
+# cols.label=c("A20NAC", "A20NAS", "B20NAS", "A21ABI" ,"B21ABI","A21NAC", "B21NAC", "A21NAS", "B21NAS")
+# names(cols.label)=c(unique(stvc$env)) 
+
+stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_nested(trait~env+year,scales = "free_y") + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top",axis.text.x = element_text(angle=90)  )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top",axis.text.x = element_text(angle=90) ) + labs(x="Effects", y="Genotypic variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 )
+```
+
+## Resultados
+
+```{r}
+stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
+  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+```
+
+
+
+
+## Resultados
+
+```{r}
+stvc$CV[stvc$CV == 948.7212] <- NA
+stvc$CV[stvc$CV == 130.8657] <- NA
+stvc$CV[stvc$CV == 129.7948] <- NA
+
+ stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
+  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+
+
+```
+
+## Resultados
+
+```{r}
+stvc$CV[stvc$CV == 99.4859] <- NA
+
+ stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
+  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
+
+
+```
+
+## Perguntas?
+
+-   josetchagas\@usp.br
+-   Obrigado!
+
+## Referências
