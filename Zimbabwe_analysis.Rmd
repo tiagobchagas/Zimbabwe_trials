@@ -607,7 +607,7 @@ stvcl$env <- cols.label[stvcl$env]
 # Or use in facet_grid:
 # + facet_grid(~env, labeller = labeller(env = cols.label))
 
-stvclp <- stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_grid2(trait~env,scales = "free_y",labeller = labeller(env = cols.label)) + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top",axis.text.x = element_text(angle = 90) )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top", strip.text = element_text(size = 6.5) ) + labs(x="Effects", y="Genotypic variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 ) 
+stvclp <- stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_grid2(trait~env,scales = "free_y",labeller = labeller(env = cols.label)) + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top",axis.text.x = element_text(angle = 90) )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top", strip.text = element_text(size = 6.5) ) + labs(x="Effects", y="Variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 ) 
 
 stvclp
 
@@ -957,6 +957,9 @@ target2 = gen.sel
 a=GY
 b=PH
 c=PL
+labels <- function(x) {
+  gsub("G_", "V0", x) 
+}
 
 
 a$data=a$data[which(a$data$x  %in% target2   ),]
@@ -976,7 +979,7 @@ GY=a +
           panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
           axis.text.y = element_text(color = ifelse(  a$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Grain Yield",y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Grain Yield",x="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 # b$data=b$data[which(b$data$x  %in% target2 &  b$data$y  %in% target2),]
 
@@ -985,7 +988,7 @@ PH=b +
           panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
           axis.text.y = element_text(color = ifelse(  b$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Heigth", x="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Heigth", y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 PL=c +
   theme(    panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
@@ -1003,7 +1006,6 @@ plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol = 3, common.legend =
 
 
 
-plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol = 3, common.legend = T)
 
 
 ggsave(plot=plot.pair,device = "pdf",filename ="Plots/plots_pair.pdf",dpi = "retina",height = 6,width = 8)
@@ -1032,8 +1034,15 @@ models= vector("list",length(3))
 models[[1]] = res_GY;
 models[[2]] = res_PH
 models[[3]] = res_PL
-models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="G_55"),]
+
+models[[1]]$across$perfo$ID = gsub("G_", "V00", models[[1]]$across$perfo$ID ) 
+models[[2]]$across$perfo$ID = gsub("G_", "V00", models[[2]]$across$perfo$ID ) 
+models[[3]]$across$perfo$ID = gsub("G_", "V00", models[[3]]$across$perfo$ID ) 
+
+models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="V0055"),]
 names(models) <- c("GY","PH","PL")
+
+
 BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.1,save.df = T,verbose = T )
 
 df=print(BPSI_soy)
@@ -1058,19 +1067,34 @@ Highlighting the ranking of probability of superior performance per trait of the
 #| fig-cap: "Ranking of probability of superior performance per trait - w (2,1,1)"
 library(knitr)
 
-plot(BPSI_soy,category = "Ranks")
+a=plot(BPSI_soy,category = "Ranks")
+a
 ```
 
 
 ```{r bpsi plot}
 #| label: fig-bpsi
 #| fig-cap: "Selected families based on BPSI rank - w (2,1,1)"
-plot(BPSI_soy,category = "BPSI")
-library(kableExtra)
+b=plot(BPSI_soy,category = "BPSI")
+b
+
+
 ```
 
 
 ```{r bpsi table}
+plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 2, common.legend = F)
+
+
+
+
+
+
+
+
+ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 6,width = 8, bg = "white")
+
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
@@ -1120,6 +1144,8 @@ plot(BPSI_soy,category = "Ranks")
 #| label: fig-bpsi-2
 #| fig-cap: "Selected families based on BPSI rank - w (3,1,1)"
 plot(BPSI_soy,category = "BPSI")
+
+
 library(kableExtra)
 ```
 
