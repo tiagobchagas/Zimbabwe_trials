@@ -137,6 +137,7 @@ selected=gen_sel[1:gen_i,]
 
 bpsi$sel=ifelse(rownames(bpsi) %in% rownames(selected) , "selected","not_sel")
 bpsi=bpsi[order(bpsi$bpsi,decreasing = F),]
+bpsi$gen=rownames(bpsi)
 if(verbose) message('-> Genotypes selected using BPSI')
 attr(bpsi, "control")=int
 output = list(BPSI=bpsi,df=df) 
@@ -150,7 +151,7 @@ class(output)="BPSI"
         dir.create(path = paste0(getwd(),'/BPSI'))
         utils::write.csv(output$BPSI,
                          file = paste0(getwd(),'/BPSI/bpsi.csv'),
-                         row.names = T)
+                         row.names = F)
         utils::write.csv(output$df,
                            file = paste0(getwd(),'/BPSI/prob_df.csv'),
                            row.names = F)

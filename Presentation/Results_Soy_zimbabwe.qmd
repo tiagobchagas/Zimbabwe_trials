@@ -157,6 +157,8 @@ pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)]
 
 
 pheno$geno <- gsub(" ", "_",pheno$Crop_Variety)
+pheno$geno <- factor(pheno$geno)
+levels(pheno$geno) <- paste("G", 1:length(levels(pheno$geno)), sep = "_")
 
 
 pheno[which(pheno$HARV_DATE==""),"LOCATION_NAME"]
@@ -187,6 +189,7 @@ pheno[, factors] <- lapply(pheno[, factors], as.factor)
 pheno$LOCATION_NAME <- substr(pheno$LOCATION_NAME, 1, 7)   
 pheno$CROP_SEASON <- substr(pheno$CROP_SEASON, 3, 4)   
 pheno_long <- reshape2::melt(pheno, measure.vars = traits, variable.name = "trait") #transformando o pheno em formato longo
+
 ```
 
 
@@ -319,9 +322,16 @@ models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$p
 names(models) <- c("GY","PH","PL")
 BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.1,save.df = T,verbose = T )
 
-df=print(BPSI_soy)
+df=BPSI_soy$BPSI
 
 gen.sel = df[which(df$sel=="selected"),"gen"]
+
+
+real.names=distinct(pheno[,c(5,15)])
+
+df <- left_join(df, real.names, by = c("gen" = "geno"))
+
+print(df)
 
 ```
 

@@ -587,7 +587,7 @@ unique(stvc$env)
 
 stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_grid(trait~env,scales = "free_y") + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top", )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top", ) + labs(x="Effects", y="Genotypic variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 ) 
 
-View(stvcl)
+
 
 stvc_bef <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
   ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
@@ -709,7 +709,7 @@ save(res_GY,file = "Saves/res_GY_year.rda")
 ```
 
 ## Variances
-```{r}
+```{r, eval=FALSE}
 outs_PH=readRDS("Saves/outs_PH.rds")
 outs_PL=readRDS("Saves/outs_PL.rds")
 outs_GY=readRDS("Saves/outs_GY.rds")
@@ -726,7 +726,7 @@ head(varcomp)
 varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") + facet_wrap(~trait,scales="free")
 ```
 
-```{r}
+```{r, eval=FALSE}
 outs_PH=readRDS("Saves/outs_PH_year.rds")
 outs_PL=readRDS("Saves/outs_PL_year.rds")
 outs_GY=readRDS("Saves/outs_GY_year.rds")
@@ -788,27 +788,49 @@ ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi 
 
 ## Probsup within locations
 ```{r,eval=FALSE}
+rm(list=ls())
 
+
+library(ProbBreed)
+library(tidyverse)
 load("Saves/res_PL_year.rda")
 load("Saves/res_PH_year.rda")
 load("Saves/res_GY_year.rda")
 
 
-ls()
+
+df=read.csv("BPSI/bpsi.csv")
+
+gen.sel = df[which(df$sel=="selected"),"gen"]
 
 GY=plot(res_GY, category = "perfo", level = "within")
 PH=plot(res_PH, category = "perfo", level = "within")
 PL=plot(res_PL, category = "perfo", level = "within")
 
-GY=GY+ theme(axis.text.y = element_text(size=3,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Grain Yield")
-PH=PH+ theme(axis.text.y = element_text(size=3, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")
-PL=PL+ theme(axis.text.y = element_text(size=3, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")
+unique(GY$data$fac)
+cols.label=c("Location", "Year")
+names(cols.label)=c(unique(GY$data$fac)) 
 
+
+
+
+labels <- function(x) {
+  gsub("G_", "V0", x) 
+}
+
+
+
+GY=GY+ theme(axis.text.y = element_text(size=4,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Grain Yield")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+
+PH=PH+ theme(axis.text.y = element_text(size=4, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+PL=PL+ theme(axis.text.y = element_text(size=4, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+
+library(ggpubr)
 plot.within = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol=3, common.legend = T)
 
 
-ggsave(plot=plot.within,device = "pdf",filename ="Plots/plots_perfo_within.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",dpi = "retina",height = 6,width = 8,bg = "white")
+ggsave(plot=plot.within,device = "pdf",filename ="Plots/plots_perfo_within.pdf",dpi = "retina",height = 8,width = 10)
+ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",dpi = "retina",height = 8,width = 10,bg = "white")
 
 
 
@@ -816,6 +838,7 @@ ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",
 ![](./Plots/plots_perfo_within.png)
 
 ## Probsup across locations
+
 ```{r, eval=FALSE}
 library(ProbBreed)
 library(tidyverse)
@@ -824,29 +847,39 @@ load("Saves/res_PH_year.rda")
 load("Saves/res_GY_year.rda")
 
 
-#
+
+df=read.csv("BPSI/bpsi.csv")
+
+gen.sel = df[which(df$sel=="selected"),"gen"]
+
+
 PH=plot(res_PH)
 PL=plot(res_PL)
 GY=plot(res_GY)
 
+labels <- function(x) {
+  gsub("G_", "V0", x) 
+}
+
+
 library(RColorBrewer)
-RColorBrewer::brewer.pal(n=2,name = "Set1")
-display.brewer.all(n=2)
+RColorBrewer::brewer.pal(n=8,name = "Spectral")
+display.brewer.all(n=8)
 
 PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
 fill = ifelse(PH$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
+  labs(y = "", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
 
 PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
 fill = ifelse(PL$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
+  labs(y = "", x = "", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
 
 GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
 fill = ifelse(GY$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))
+  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
 
 
 library(ggpubr)
@@ -865,18 +898,73 @@ load("Saves/res_PL_year.rda")
 load("Saves/res_PH_year.rda")
 load("Saves/res_GY_year.rda")
 
+df=read.csv("BPSI/bpsi.csv")
 
-ls()
+gen.sel = df[which(df$sel=="selected"),"gen"]
+
 
 GY=plot(res_GY, category = "pair_perfo")
 PH=plot(res_PH, category = "pair_perfo")
 PL=plot(res_PL, category = "pair_perfo")
 
-GY=GY+ theme(axis.text.x = element_text( color = ifelse(GY$data$y %in% gen.sel,  "#E41A1C", "black")))+ labs( title = "Grain Yield")
-PH=PH+ theme(axis.text.x = element_text( color = ifelse(PH$data$y %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")
-PL=PL+ theme(axis.text.x = element_text( color = ifelse(PL$data$y %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")
+library(tidyverse)
 
-plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T)
+
+
+target2 = gen.sel
+# load("margsarq.rda")
+# load("b.rda")
+# load("a.rda")
+a=GY
+b=PH
+c=PL
+
+
+a$data=a$data[which(a$data$x  %in% target2   ),]
+b$data=b$data[which(b$data$x  %in% target2   ),]
+c$data=c$data[which(c$data$x  %in% target2  ),]
+a$data$model ="GY"
+b$data$model ="PH"
+c$data$model = "PL"
+dim(a$data)
+
+highlighted_obs <- c(gen.sel)
+
+
+
+GY=a +
+  theme(
+          panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
+          axis.text.y = element_text(color = ifelse(  a$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          scale_fill_viridis_c(direction = 1, na.value = "white",
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Grain Yield",y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+
+# b$data=b$data[which(b$data$x  %in% target2 &  b$data$y  %in% target2),]
+
+PH=b +
+  theme(
+          panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
+          axis.text.y = element_text(color = ifelse(  b$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          scale_fill_viridis_c(direction = 1, na.value = "white",
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Heigth", x="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+
+PL=c +
+  theme(    panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
+          axis.text.y = element_text(color = ifelse(  c$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          scale_fill_viridis_c(direction = 1, na.value = "white",
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Lodging",x="",y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+
+
+
+
+plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol = 3, common.legend = T)
+
+
+
+
+
+
+plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol = 3, common.legend = T)
 
 
 ggsave(plot=plot.pair,device = "pdf",filename ="Plots/plots_pair.pdf",dpi = "retina",height = 6,width = 8)
@@ -887,8 +975,11 @@ ggsave(plot=plot.pair,device = "png",filename ="Plots/plots_pair.png",dpi = "ret
 ```
 
 ![](./Plots/plots_pair.png)
-# BPSI
+# BPSI - w 2,1,1
 ```{r}
+#| output-location: column
+#| label: bpsi-selected
+#| echo: true
 
 load("Saves/res_PL_year.rda")
 load("Saves/res_PH_year.rda")
@@ -910,15 +1001,22 @@ df=print(BPSI_soy)
 
 gen.sel = df[which(df$sel=="selected"),"gen"]
 
+real.names=distinct(pheno[,c(5,15)])
+
+df <- left_join(df, real.names, by = c("gen" = "geno"))
+
+
+
+
 ```
 
-# BPSI plot
+# BPSI plot - w 2,1,1
 
 Highlighting the ranking of probability of superior performance per trait of the selected families.
 
 ```{r bpsi plot ranks}
 #| label: fig-ranks
-#| fig-cap: "Ranking of probability of superior performance per trait"
+#| fig-cap: "Ranking of probability of superior performance per trait - w (2,1,1)"
 library(knitr)
 
 plot(BPSI_soy,category = "Ranks")
@@ -927,12 +1025,67 @@ plot(BPSI_soy,category = "Ranks")
 
 ```{r bpsi plot}
 #| label: fig-bpsi
-#| fig-cap: "Selected families based on BPSI rank"
+#| fig-cap: "Selected families based on BPSI rank - w (2,1,1)"
 plot(BPSI_soy,category = "BPSI")
 library(kableExtra)
+```
 
 
+```{r bpsi table}
+BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
+```
+
+
+# BPSI - w 3,1,1
+```{r}
+#| output-location: column
+#| label: bpsi-selected 2
+#| echo: true
+
+load("Saves/res_PL_year.rda")
+load("Saves/res_PH_year.rda")
+load("Saves/res_GY_year.rda")
+
+source("data/bpsi_fun.R")
+
+models= vector("list",length(3))
+
+
+models[[1]] = res_GY;
+models[[2]] = res_PH
+models[[3]] = res_PL
+models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="G_55"),]
+names(models) <- c("GY","PH","PL")
+BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(3,1,1),int = 0.1,save.df = T,verbose = T )
+
+df=print(BPSI_soy)
+
+gen.sel = df[which(df$sel=="selected"),"gen"]
+```
+
+# BPSI plot - w 3,1,1
+
+Highlighting the ranking of probability of superior performance per trait of the selected families.
+
+```{r bpsi plot ranks 2}
+#| label: fig-ranks-2
+#| fig-cap: "Ranking of probability of superior performance per trait - w (3,1,1)"
+library(knitr)
+
+plot(BPSI_soy,category = "Ranks")
+```
+
+
+```{r bpsi plot 2}
+#| label: fig-bpsi-2
+#| fig-cap: "Selected families based on BPSI rank - w (3,1,1)"
+plot(BPSI_soy,category = "BPSI")
+library(kableExtra)
+```
+
+
+```{r bpsi table 2}
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
 ```
