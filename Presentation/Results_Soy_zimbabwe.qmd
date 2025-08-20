@@ -11,7 +11,7 @@ format:
     height: 900
     incremental: true
     highlight-style: arrow
-    transition: slide
+    transition: fade
     code-tools:
       source: true
       toggle: true
@@ -41,7 +41,7 @@ How to select superior soybean genotypes across locations and years (GxE interac
 . . .
 
 ::: {.callout-tip .justify icon="true" title="Hypothesis"}
-Estimate probability of superior performance [@Dias2022] across seasons and years and
+Estimate probability of superior performance [@Dias2022] across locations and years and
 classify genotypes using Bayesian Probabilistic Selection Index [@Chagas2025]
 
 :::
@@ -54,7 +54,7 @@ Select superior soybean genotypes to grain yield, plant height and plant lodging
 
 
 
-## Material e Métodos
+## Material and Methods
 ::::: {layout="[ 70, 30 ]"}
 ![Ensaios experimentais](../Plots/soybean_zimbabwe.png){fig-align=left width=2500 heigth=2500}
 
@@ -65,10 +65,11 @@ Select superior soybean genotypes to grain yield, plant height and plant lodging
 - 98 genotypes
 - 3 traits (Grain Yield, Plant Height, Plant Lodging)
 - Randomized complete block design (RCB)
+- Using package ProbBreed [@Chaves2024]
 :::
 :::::
 
-## Material e Métodos
+## Material and Methods
 
 Individual analyses
 
@@ -76,39 +77,40 @@ $$
  \mathbf{y} = \mathbf{X_1b} + \mathbf{Z_1g} + \mathbf{\epsilon} 
 $$
 
-onde $\mathbf{y}$ é o vetor das observações fenotípicas, $\mathbf{b}$ é o vetor dos efeitos fixos de repetição, $\mathbf{g}$ é o vetor dos efeitos aleatórios de genótipo e $\mathbf{\epsilon}$ é o vetor dos efeitos residuais. $\mathbf{X_1}$, $\mathbf{X_2}$ e $\mathbf{Z_1}$ são matrizes de incidência dos  efeitos $\mathbf{b}$ e $\mathbf{g}$ respectivamente.
+where $\mathbf{y}$ is the vector of phenotypic observations, $\mathbf{b}$  is the vector of fixed effects of replication, $\mathbf{g}$ is the vector of random effects of genotypes and $\mathbf{\epsilon}$ is the vector of random errors. $\mathbf{X_1}$, $\mathbf{X_2}$ e $\mathbf{Z_1}$ are incidence matrix of $\mathbf{b}$ and $\mathbf{g}$ effects respectively..
 
-## Material e Métodos
+## Material and Methods
 
-### Herdabilidade 
+### Heritability 
 
 $$
 h^2 = \sigma^2g    / \sigma^2g + \sigma^2e
 $$
 
-onde $\sigma^2g$ é a variância genética e $\sigma_e^2$ é a variância do erro.
+where $\sigma^2g$ is the genetic variance and $\sigma_e^2$ is the residual variance.
 
-### Coeficiente de Variação Experimental
+### Experimental Coeficient of Variation
 
 $$
 CV = \frac{\sigma_e}{\mu} \times 100
 $$
 
-onde $\mu$ é a média da característica.
+where $\mu$ is the trait mean.
 
 ## Material e Métodos
-### Teste de razão de verossimilhança
+### Likelihood ratio test
 
 $$LRT= −2 \times (Log𝐿 - Log L_𝑅)$$
 
-onde $L$ é o ponto máximo da função de verossimilhança restrita do modelo completo e $L_R$ é o mesmo para o modelo reduzido, ou seja, sem o efeito a ser testado. O valor de LRT foi comparado com o valor tabulado com base na tabela qui-quadrado, a um grau de liberdade e probabilidade de 0,95.
+ 
+where $L$ is the maximum point of residual likelihood function of the complete model and $L_R$ is the same for the reduced model, that is, without the effect to be tested. The LRT value was compared with a tabulated value based on the chi-square table, with one degree of freedom and 0.95 probability.
 
 ## Material and Methods
 ### Bayesian model
 $$
 y_{jkhp} = \mu + t_h + l_k + b_{p(k)} + g_j + gl_{jk} + gt_{jh} + \varepsilon_{jkhp}
 $$
-where the $y_{jkhp}$  is the phenotypic record of the $j^{th}$ genotype, allocated in the $ p^{th}$block, in the $k^{th}$ location and in the year $t_{th}$. All other effects were previously defined but $b_{p(k)}$, which is the effect of the $p^{th}$ block in the $k{th}$ location, and $gl^{jk}$ , which correspond to the genotype-by-location interaction $t_h$ and $t_{jh}$  are the main effect of years and the genotypes-by-years interaction effect, respectively.
+where the $y_{jkhp}$  is the phenotypic record of the $j^{th}$ genotype, allocated in the $p^{th}$ block, in the $k^{th}$ location and in the year $t_{th}$. All other effects were previously defined but $b_{p(k)}$, which is the effect of the $p^{th}$ block in the $k{th}$ location, and $gl^{jk}$ , which correspond to the genotype-by-location interaction $t_h$ and $t_{jh}$  are the main effect of years and the genotypes-by-years interaction effect, respectively.
 
 ## Material and Methods
 
@@ -243,7 +245,7 @@ stvcl$year <- substr(stvcl$year,3,4)
 stvcl|>  ggplot(aes(x=name,y=value))+ geom_col(data= subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="*"), color="black", fill="#a8ddb5") + geom_col(data= subset(stvcl,  grepl("error",stvcl$name)),color="black",fill="lightblue") + facet_nested(trait~env+year,scales = "free_y") + geom_text(data=subset(stvcl, !grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = geno_sig), size=6 ) + theme(legend.position = "top",axis.text.x = element_text(angle=90)  )  + geom_col(data= subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(fill="ns"), fill="gray", color="black")  + theme(legend.position = "top",axis.text.x = element_text(angle=90) ) + labs(x="Effects", y="Genotypic variance component") +   geom_text(data=subset(stvcl, grepl("ns", stvcl$geno_sig) & grepl("geno",stvcl$name)),aes(label = "ns", vjust = -1.0), size=3 )
 ```
 
-## Resultados
+## Results
 
 ```{r}
 stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
@@ -277,10 +279,78 @@ stvc$CV[stvc$CV == 99.4859] <- NA
 
 ```
 
-## Bay
+## Results
+![Variances](../Plots/varcomp.png){}
 
-## Perguntas?
+## Results
+![Variances](../Plots/varcomp1.png){}
 
+## Results
+![Density](../Plots/plots_density.png){}
+
+
+## Results
+![Within](../Plots/plots_perfo_within.png){}
+
+## Results
+![Across](../Plots/plots_perfo.png){}
+
+## Results
+![Density](../Plots/plots_pair.png){}
+
+# BPSI
+```{r}
+#| output-location: column
+#| label: bpsi-selected
+#| echo: true
+load("../Saves/res_PL_year.rda")
+load("../Saves/res_PH_year.rda")
+load("../Saves/res_GY_year.rda")
+
+source("../data/bpsi_fun.R")
+
+models= vector("list",length(3))
+
+
+models[[1]] = res_GY;
+models[[2]] = res_PH
+models[[3]] = res_PL
+models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="G_55"),]
+names(models) <- c("GY","PH","PL")
+BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.1,save.df = T,verbose = T )
+
+df=print(BPSI_soy)
+
+gen.sel = df[which(df$sel=="selected"),"gen"]
+
+```
+
+## Results
+
+Highlighting the ranking of probability of superior performance per trait of the selected families.
+
+```{r bpsi plot ranks}
+#| label: fig-ranks
+#| fig-cap: "Ranking of probability of superior performance per trait"
+library(knitr)
+
+plot(BPSI_soy,category = "Ranks")
+```
+
+## Results
+```{r bpsi plot}
+#| label: fig-bpsi
+#| fig-cap: "Selected families based on BPSI rank"
+plot(BPSI_soy,category = "BPSI")
+```
+
+
+
+
+## Title?
+
+- Selection of superior soybean genotypes across locations and years in Zimbabwe according to multitrait ideotype
+- Multitrait selection of soybean varieties using Bayesian probabilistic selection index
 -   josetchagas\@usp.br
 -   Obrigado!
 
