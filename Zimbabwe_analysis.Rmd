@@ -760,7 +760,8 @@ outs_PH$variances$trait="PH"
 outs_PL$variances$trait="PL"
 outs_GY$variances$trait="GY"
 
-varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances) 
+varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances)
+
 
 library(tidyverse)
 head(varcomp)
@@ -777,12 +778,22 @@ outs_PH$variances$trait="Plant Height"
 outs_PL$variances$trait="Plant Lodging"
 outs_GY$variances$trait="Grain Yield"
 
-varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances) 
+varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances)
+save(varcomp,file = "Saves/varcomp.rda")
 
+load("Saves/varcomp.rda")
 library(tidyverse)
 head(varcomp)
-vc=varcomp |> ggplot(aes(x=effect,y=var, fill=trait)) + geom_col(position = "dodge") + theme(axis.text.x = element_text(angle=90), legend.position = "none") +
- geom_errorbar(aes(ymin = var-sd,ymax=var+sd),width=0.1)+ facet_wrap(~trait,scales="free")
+
+varcomp[grepl("error",varcomp$effect),"type"] <- "error"
+varcomp[grepl(":CROP",varcomp$effect),"type"] <- "GxY"
+varcomp[grepl(":LOC",varcomp$effect),"type"] <- "GxL"
+varcomp[grepl("geno",varcomp$effect),"type"] <- "G"
+varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Y"
+varcomp[grepl("LOCATION_NAME",varcomp$effect),"type"] <- "L"
+
+
+vc=varcomp |> ggplot(aes(x=effect,y=var, fill=type)) + geom_col(position = "stack") + theme(axis.text.x = element_text(angle=90), legend.position = "none")+ facet_wrap(~trait,scales="free");vc
 
 ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp1.pdf",dpi = "retina",height = 6,width = 8)
 ggsave(plot=vc,device = "png",filename ="Plots/varcomp1.png",dpi = "retina",height = 6,width = 8,bg = "white")
