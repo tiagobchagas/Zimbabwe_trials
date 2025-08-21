@@ -76,18 +76,18 @@ bibliography: references.bib
 </div>
 ::::
 
-## Hands on
-- ### Criação de conta no Github      
+## Criação de conta no Github      
 Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com/) e crie uma conta.  
 
-- ### Configuração de git e Rstudio  
-(em teoria, só precisa ser realizado apenas 1x em cada computador)  
-No Terminal, proceda com os seguintes comandos: 
+## Configuração de git e Rstudio  
+- (em teoria, só precisa ser realizado apenas 1x em cada computador)   
+- No Terminal, proceda com os seguintes comandos:   
 - git config --global user.name "Your Name"  
 - git config --global user.email "your_email@example.com"
 
-## Hands on
-- ### Conecte o RStudio ao Github seguindo os passos abaixo
+## Conecte o RStudio ao Github seguindo os passos abaixo{.scrollable}
+:::: columns
+::: {.column}
 1. In RStudio, go to Tools > Global Options... > Git/SVN
 2. Make sure Enable version control for RStudio projects is selected
 3. Make sure to point to the right path for Git executable (and don’t worry about SVN)
@@ -98,14 +98,38 @@ No Terminal, proceda com os seguintes comandos:
 8. Paste (Crtl + V) the key from your clipboard
 9. Click on Add SSH key
 10. No Terminal, É MANDATÓRIO rodar:
-11. ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+11. `ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts`
+:::
 
-## Hands on
-- ### Conecte o git ao Github seguindo os passos abaixo
-1. No Terminal, rode: gh auth login
-2. Pressione ENTER até chegar a: What is your preferred protocol for Git operations? E selecione SSH.
-3. Continue pressionando ENTER para as demais perguntas até que um código seja gerado (copie-o) e pressione ENTER mais uma vez
-4. Cole o código do terminal na janela do browser (pode ser necessário fazer o login no Github antes) e clique no botão Authorize github
+::: {.column}
+
+![](../misc/screen/1.png){.fragment fig-align="right" .fade-in}
+
+![](../misc/screen/2.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/3.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/4.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/5.png){.fragment fig-align="right" .fade-in}
+
+![](../misc/screen/6.png){.fragment fig-align="right" .fade-in}
+:::
+::::
+
+## Conecte o git ao Github seguindo os passos abaixo{.scrollable}
+:::: {.columns}
+::: {.column width="50%"}
+1. No Terminal, rode: `gh auth login` 
+2. Pressione ENTER até chegar a: *What is your preferred protocol for Git operations?* E selecione `SSH`. 
+3. Continue pressionando ENTER para as demais perguntas até que um código seja gerado (copie-o) e pressione ENTER mais uma vez 
+4. Cole o código do terminal na janela do browser (pode ser necessário fazer o login no Github antes) e clique no botão Authorize github 
+:::
+
+::: {.column width="50%"}
+![](../misc/screen/7.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/8.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/9.png){.fragment fig-align="right" .fade-in}
+![](../misc/screen/10.png){.fragment fig-align="right" .fade-in}
+:::
+::::
 
 ## Hands on
 ### Criando um novo repositório
@@ -127,7 +151,7 @@ No Terminal, proceda com os seguintes comandos:
 6. Click on Create Project
 7. Se, depois de copiar um repositório existente, a aba Git não aparecer no RStudio, você precisa ir:  
 7.1 Em Tools > Project options > Git/SVN, in Version control system, select Git  
-7.2 No Terminal do RStudio, rode git remote -v e, em seguida, o rode todo o comando que começa com git config --global --add safe.directory
+7.2 No Terminal do RStudio, rode git remote -v e, em seguida, o rode todo o comando que começa com `git config --global --add safe.directory`
 
 ## Hands on
 ### Desfazendo um commit 
