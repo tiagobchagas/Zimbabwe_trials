@@ -632,10 +632,23 @@ stvc$CV[stvc$CV == 99.4859] <- NA
 
 unique(stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV))$name
 
-stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
-  ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")+ scale_x_discrete(labels = cols.label) 
+stvc$year <- gsub(".*_", "", stvc$env)
+stvc$envs <- gsub("_.*", "", stvc$env)
+head(stvc)
 
-library("ProbBreed")
+stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year) |> pivot_longer(H2:CV) |>  
+  ggplot()+ geom_boxplot(aes(x=envs,y=value, fill=envs))+
+  facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
+                                                     strip.text = element_text(face = "bold")) + labs(x= "Environments", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_env
+
+stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year) |> pivot_longer(H2:CV) |>  
+  ggplot()+ geom_boxplot(aes(x=year,y=value, fill=year))+
+  facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
+                                                     strip.text = element_text(face = "bold")) + labs(x= "Year", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_year
+
+
+library(ggpubr)
+plot.par = ggarrange(stvc_env, stvc_year,labels = c("A","B"),ncol = 1, common.legend = F)
 
    # z = data.list[["Stapleford_2018"]]
    # z = data.list[["Harare_2021"]]
@@ -648,10 +661,10 @@ library("ProbBreed")
    
    # stvc |> mutate(CV = case_when(CV == 948.7212~NA))
    
-   stvc_aft
+
    
-ggsave(plot=stvc_aft,device = "pdf",filename ="Plots/plots_parameters.pdf",dpi = "retina",height = 8,width = 10)
-ggsave(plot=stvc_aft,device = "png",filename ="Plots/plots_parameters.png",dpi = "retina",height = 8,width = 10,bg = "white")
+ggsave(plot=plot.par,device = "pdf",filename ="Plots/plots_parameters.pdf",dpi = "retina",height = 8,width = 10)
+ggsave(plot=plot.par,device = "png",filename ="Plots/plots_parameters.png",dpi = "retina",height = 8,width = 10,bg = "white")
 ```
 
 # Bayesian model
@@ -786,14 +799,24 @@ library(tidyverse)
 head(varcomp)
 
 varcomp[grepl("error",varcomp$effect),"type"] <- "error"
-varcomp[grepl(":CROP",varcomp$effect),"type"] <- "GxY"
-varcomp[grepl(":LOC",varcomp$effect),"type"] <- "GxL"
 varcomp[grepl("geno",varcomp$effect),"type"] <- "G"
 varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Y"
 varcomp[grepl("LOCATION_NAME",varcomp$effect),"type"] <- "L"
+varcomp[grepl("geno:CROP",varcomp$effect),"type"] <- "GxY"
+varcomp[grepl("geno:LOC",varcomp$effect),"type"] <- "GxL"
+varcomp[grepl("rep",varcomp$effect),"type"] <- "R"
 
+custom_palette=viridis::turbo(n = 19)
 
-vc=varcomp |> ggplot(aes(x=effect,y=var, fill=type)) + geom_col(position = "stack") + theme(axis.text.x = element_text(angle=90), legend.position = "none")+ facet_wrap(~trait,scales="free");vc
+unique(varcomp$effect)
+vc=varcomp |> ggplot(aes(x=type,y=var, fill = effect)) + geom_col(position = "stack", just = 0.5) + theme(axis.text.x = element_text(angle=90))+ facet_wrap(~trait,scales="free") +labs(x="Effects",y="Variance components",fill="Effects")+
+    scale_fill_manual(
+    values = custom_palette, 
+    labels = c("rep"="R", "geno"="G", "LOCATION_NAME"="L","geno:LOCATION_NAME"="GxL",
+ "CROP_SEASON"="Y", "geno:CROP_SEASON"="GxY", "error_env1"= "e_env1", "error_env2"="e_env2",        
+  "error_env3"="e_env3","error_env4"="e_env4","error_env5"="e_env5","error_env6"="e_env6",        
+"error_env7"="e_env7", "error_env8"="e_env8", "error_env9"="e_env9", "error_env10"="e_env10",
+"error_env11"="e_env11","error_env12"="e_env12","error_env13"="e_env13"));vc
 
 ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp1.pdf",dpi = "retina",height = 6,width = 8)
 ggsave(plot=vc,device = "png",filename ="Plots/varcomp1.png",dpi = "retina",height = 6,width = 8,bg = "white")
@@ -855,6 +878,7 @@ df=read.csv("BPSI/bpsi.csv")
 
 gen.sel = df[which(df$sel=="selected"),"gen"]
 
+gen.sel <- gsub("V00","G_",gen.sel)
 GY=plot(res_GY, category = "perfo", level = "within")
 PH=plot(res_PH, category = "perfo", level = "within")
 PL=plot(res_PL, category = "perfo", level = "within")
@@ -867,22 +891,25 @@ names(cols.label)=c(unique(GY$data$fac))
 
 
 labels <- function(x) {
-  gsub("G_", "V0", x) 
+  gsub("G_", "V00", x) 
 }
 
 
 
-GY=GY+ theme(axis.text.y = element_text(size=4,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Grain Yield")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties",caption = "Selected varieties are highlighted in red")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
-PH=PH+ theme(axis.text.y = element_text(size=4, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Height")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
-PL=PL+ theme(axis.text.y = element_text(size=4, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black"))) + labs( title = "Plant Lodging")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
++
+  scale_fill_manual(  values = c("Selected" = "#377EB8", "Not Selected" = "#E41A1C"),name = "BPSI")
+
+PH=PH+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Height",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+PL=PL+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Lodging",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
 library(ggpubr)
 plot.within = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol=3, common.legend = T)
 
 
-ggsave(plot=plot.within,device = "pdf",filename ="Plots/plots_perfo_within.pdf",dpi = "retina",height = 8,width = 10)
-ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",dpi = "retina",height = 8,width = 10,bg = "white")
+ggsave(plot=plot.within,device = "pdf",filename ="Plots/plots_perfo_within.pdf",dpi = "retina",height = 12,width = 12)
+ggsave(plot=plot.within,device = "png",filename ="Plots/plots_perfo_within.png",dpi = "retina",height = 12,width = 12,bg = "white")
 
 
 
@@ -904,13 +931,13 @@ df=read.csv("BPSI/bpsi.csv")
 
 gen.sel = df[which(df$sel=="selected"),"gen"]
 
-
+gen.sel <- gsub("V00","G_",gen.sel)
 PH=plot(res_PH)
 PL=plot(res_PL)
 GY=plot(res_GY)
 
 labels <- function(x) {
-  gsub("G_", "V0", x) 
+  gsub("G_", "V00", x) 
 }
 
 
@@ -918,28 +945,33 @@ library(RColorBrewer)
 RColorBrewer::brewer.pal(n=8,name = "Spectral")
 display.brewer.all(n=8)
 
+
+
+
+
 PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
-fill = ifelse(PH$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
-,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
+fill = ifelse(ID %in% gen.sel,  "Selected", "Not Selected" )) ,size = 2,shape = 21,stroke = 0.4)+ 
+  labs(y = "Probability of superior performance", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
 
 PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
-fill = ifelse(PL$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
+fill = ifelse(PL$data$ID %in% gen.sel, "Selected", "Not Selected")) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
+  labs(y = "", x = "Varieties", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
 
 GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
-fill = ifelse(GY$data$ID %in% gen.sel,  "#377EB8","#E41A1C" )) 
+fill = ifelse(GY$data$ID %in% gen.sel,  "Selected", "Not Selected")) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)
+  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
 
 
 library(ggpubr)
-plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T)
+plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T,hjust = c(-2.5,-2.5,-2.5) );plot.perfo
 
 
-ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 8,width = 10)
+ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 8,width = 10,bg = "white")
 
 ```
 ![](./Plots/plots_perfo.png)
