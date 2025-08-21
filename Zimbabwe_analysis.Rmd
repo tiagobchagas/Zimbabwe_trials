@@ -613,8 +613,8 @@ stvclp
 
 
 
-ggsave(plot=stvclp,device = "pdf",filename ="Plots/individual_analysis.pdf",dpi = "retina",height = 8,width = 10)
-ggsave(plot=stvclp,device = "png",filename ="Plots/individual_analysis.png",dpi = "retina",height = 8,width = 10,bg = "white")
+ggsave(plot=stvclp,device = "pdf",filename ="Plots/individual_analysis.pdf",dpi = "retina",height = 10,width = 15)
+ggsave(plot=stvclp,device = "png",filename ="Plots/individual_analysis.png",dpi = "retina",height = 10,width = 15,bg = "white")
 
 
 stvc_bef <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
