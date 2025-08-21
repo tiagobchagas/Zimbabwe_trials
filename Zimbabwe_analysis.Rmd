@@ -635,6 +635,7 @@ unique(stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV))$nam
 stvc_aft <- stvc |>  select(H2, CV, trait, env, geno_sig) |> pivot_longer(H2:CV) |>  
   ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")+ scale_x_discrete(labels = cols.label) 
 
+library("ProbBreed")
 
    # z = data.list[["Stapleford_2018"]]
    # z = data.list[["Harare_2021"]]
