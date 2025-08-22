@@ -1140,8 +1140,8 @@ plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 1, common.legend = F)
 
 
 
-ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 10,width = 12)
-ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 10,width = 12, bg = "white")
+ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 6,width = 8, bg = "white")
 
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 

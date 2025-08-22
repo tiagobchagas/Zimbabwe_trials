@@ -92,7 +92,6 @@
 ##' }
 ##'
 
-modlist = models;increase =c(TRUE,FALSE,FALSE);omega = c(2,1,1);int = 0.1;save.df = T;verbose = T 
 
 BPSI = function(modlist, increase = c(TRUE,FALSE,FALSE), omega, int, save.df = FALSE, verbose = FALSE){
 
@@ -350,7 +349,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
                  aes(x = 0, y = 0, color = Sel),
                  inherit.aes = FALSE, size = 4, alpha = 0) +
       scale_color_manual(values = c("Selected" = "navyblue",
-                                    "Not_Selected" = "gray"),
+                                    "Not_Selected" = "grey"),
                          breaks = c("Not_Selected","Selected"),
                          labels = c("Not selected","Selected"),
                          name = NULL,
@@ -359,7 +358,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
                                                                   alpha = 1))) +
       coord_polar(start = 0) +
       geom_segment(aes(x = id, xend = id, y = bpsi, yend = max(bpsi) + 5),
-                   color = "gray", linewidth = 0.3) +
+                   color = "gray80", linewidth = 0.3) +
       geom_text(aes(x = id, y = max(bpsi) + 10,
                     label = gen, angle = angle, hjust = hjust),
                 size = 2.8) +
