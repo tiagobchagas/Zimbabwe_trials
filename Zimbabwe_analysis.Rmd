@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Loading data
 ```{r}
-install.packages("ProbBreed")
+#install.packages("ProbBreed")
 #install.packages("sf")
 #install.packages("stars")
 library(tidyverse) 
@@ -809,7 +809,7 @@ varcomp[grepl("rep",varcomp$effect),"type"] <- "R"
 custom_palette=viridis::turbo(n = 19)
 
 unique(varcomp$effect)
-vc=varcomp |> ggplot(aes(x=type,y=var, fill = effect)) + geom_col(position = "stack", just = 0.5) + theme(axis.text.x = element_text(angle=90))+ facet_wrap(~trait,scales="free") +labs(x="Effects",y="Variance components",fill="Effects")+
+vc=varcomp |> ggplot(aes(x=type,y=var, fill = effect)) + geom_col(position = "stack", just = 0.5) + theme(axis.text.x = element_text(angle=90),strip.text = element_text(face = "bold"))+ facet_wrap(~trait,scales="free") +labs(x="Effects",y="Variance components",fill="Effects")+
     scale_fill_manual(
     values = custom_palette, 
     labels = c("rep"="R", "geno"="G", "LOCATION_NAME"="L","geno:LOCATION_NAME"="GxL",
@@ -986,7 +986,7 @@ df=read.csv("BPSI/bpsi.csv")
 
 gen.sel = df[which(df$sel=="selected"),"gen"]
 
-
+gen.sel <- gsub("V00","G_",gen.sel)
 GY=plot(res_GY, category = "pair_perfo")
 PH=plot(res_PH, category = "pair_perfo")
 PL=plot(res_PL, category = "pair_perfo")
@@ -1022,24 +1022,24 @@ highlighted_obs <- c(gen.sel)
 GY=a +
   theme(
           panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
-          axis.text.y = element_text(color = ifelse(  a$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          axis.text.y = element_text(color = ifelse(  a$data$y %in% highlighted_obs , "red", "black"), size = 7), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Grain Yield",x="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Grain Yield",x="",y="Varieties")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 # b$data=b$data[which(b$data$x  %in% target2 &  b$data$y  %in% target2),]
 
 PH=b +
   theme(
           panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
-          axis.text.y = element_text(color = ifelse(  b$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          axis.text.y = element_text(color = ifelse(  b$data$y %in% highlighted_obs , "red", "black"), size = 7), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Heigth", y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Heigth", y="", x="Varieties")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 PL=c +
   theme(    panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
-          axis.text.y = element_text(color = ifelse(  c$data$y %in% highlighted_obs , "red", "black"), size = 5), strip.text = element_text(size = 16)) +
+          axis.text.y = element_text(color = ifelse(  c$data$y %in% highlighted_obs , "red", "black"), size = 7), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Lodging",x="",y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Lodging",x="",y="",caption = "Selected varieties are highlighted in red")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 
 
@@ -1053,8 +1053,8 @@ plot.pair = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol = 3, common.legend =
 
 
 
-ggsave(plot=plot.pair,device = "pdf",filename ="Plots/plots_pair.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.pair,device = "png",filename ="Plots/plots_pair.png",dpi = "retina",height = 6,width = 8, bg = "white")
+ggsave(plot=plot.pair,device = "pdf",filename ="Plots/plots_pair.pdf",dpi = "retina",height = 12,width = 10)
+ggsave(plot=plot.pair,device = "png",filename ="Plots/plots_pair.png",dpi = "retina",height = 12,width = 10, bg = "white")
 
 
 
@@ -1128,7 +1128,7 @@ b
 
 
 ```{r bpsi table}
-plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 2, common.legend = F)
+plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 1, common.legend = F)
 
 
 
@@ -1137,8 +1137,8 @@ plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 2, common.legend = F)
 
 
 
-ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 6,width = 8, bg = "white")
+ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 16,width = 12)
+ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 16,width = 12, bg = "white")
 
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
