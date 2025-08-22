@@ -967,11 +967,13 @@ fill = ifelse(GY$data$ID %in% gen.sel,  "Selected", "Not selected"))
 
 
 library(ggpubr)
-plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T,hjust = c(-2.5,-2.5,-2.5) );plot.perfo
+library(patchwork)
+# plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T,hjust = c(-2.5,-2.5,-2.5) );plot.perfo
+plot.perfo<- GY+PH+PL+ plot_layout(guides = 'collect',nrow = 3)+plot_annotation(tag_levels = "A") & theme(legend.position = 'top');plot.perfo
 
 
-ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 6,width = 8,bg = "white")
+ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 10,width = 12)
+ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 10,width = 12,bg = "white")
 
 ```
 ![](./Plots/plots_perfo.png)
@@ -1123,25 +1125,27 @@ a
 #| label: fig-bpsi
 #| fig-cap: "Selected families based on BPSI rank - w (2,1,1)"
 b=plot(BPSI_soy,category = "BPSI")
+
 b
-
-
 ```
 
 
 ```{r bpsi table}
 library(ggpubr)
-plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 1, common.legend = F)
+library(patchwork)
+
+
+plot.bpsi <- wrap_plots(a, b, ncol = 1, heights = c(2, 1)) +
+  plot_annotation(tag_levels = "A")   # Right margin for width
+
+
+plot.bpsi <- a / b  + plot_layout(ncol = 1,heights = c(1, 2) )
 
 
 
 
-
-
-
-
-ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 6,width = 8)
-ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 6,width = 8, bg = "white")
+ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 8,width = 12)
+ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 8,width = 12, bg = "white")
 
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 
