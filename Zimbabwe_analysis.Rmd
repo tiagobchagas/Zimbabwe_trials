@@ -876,7 +876,7 @@ load("Saves/res_GY_year.rda")
 
 df=read.csv("BPSI/bpsi.csv")
 
-gen.sel = df[which(df$sel=="selected"),"gen"]
+gen.sel = df[which(df$sel=="Selected"),"gen"]
 
 gen.sel <- gsub("V00","G_",gen.sel)
 GY=plot(res_GY, category = "perfo", level = "within")
@@ -929,7 +929,7 @@ load("Saves/res_GY_year.rda")
 
 df=read.csv("BPSI/bpsi.csv")
 
-gen.sel = df[which(df$sel=="selected"),"gen"]
+gen.sel = df[which(df$sel=="Selected"),"gen"]
 
 gen.sel <- gsub("V00","G_",gen.sel)
 PH=plot(res_PH)
@@ -950,28 +950,28 @@ display.brewer.all(n=8)
 
 
 PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
-fill = ifelse(ID %in% gen.sel,  "Selected", "Not Selected" )) ,size = 2,shape = 21,stroke = 0.4)+ 
+fill = ifelse(ID %in% gen.sel,  "Selected", "Not selected" )) ,size = 2,shape = 21,stroke = 0.4)+ 
   labs(y = "Probability of superior performance", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
-  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
-fill = ifelse(PL$data$ID %in% gen.sel, "Selected", "Not Selected")) 
+fill = ifelse(PL$data$ID %in% gen.sel, "Selected", "Not selected")) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
   labs(y = "", x = "Varieties", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
-  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
-fill = ifelse(GY$data$ID %in% gen.sel,  "Selected", "Not Selected")) 
+fill = ifelse(GY$data$ID %in% gen.sel,  "Selected", "Not selected")) 
 ,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not Selected" ="#377EB8" ),name = "BPSI")
+  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 
 library(ggpubr)
 plot.perfo = ggarrange(GY,PH,PL,labels = c("A","B","C"),nrow = 3, common.legend = T,hjust = c(-2.5,-2.5,-2.5) );plot.perfo
 
 
-ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 8,width = 10)
-ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 8,width = 10,bg = "white")
+ggsave(plot=plot.perfo,device = "pdf",filename ="Plots/plots_perfo.pdf",dpi = "retina",height = 6,width = 8)
+ggsave(plot=plot.perfo,device = "png",filename ="Plots/plots_perfo.png",dpi = "retina",height = 6,width = 8,bg = "white")
 
 ```
 ![](./Plots/plots_perfo.png)
@@ -984,7 +984,7 @@ load("Saves/res_GY_year.rda")
 
 df=read.csv("BPSI/bpsi.csv")
 
-gen.sel = df[which(df$sel=="selected"),"gen"]
+gen.sel = df[which(df$sel=="Selected"),"gen"]
 
 gen.sel <- gsub("V00","G_",gen.sel)
 GY=plot(res_GY, category = "pair_perfo")
@@ -1085,14 +1085,14 @@ models[[2]]$across$perfo$ID = gsub("G_", "V00", models[[2]]$across$perfo$ID )
 models[[3]]$across$perfo$ID = gsub("G_", "V00", models[[3]]$across$perfo$ID ) 
 
 models[[3]]$across$perfo <- models[[3]]$across$perfo[-which(models[[3]]$across$perfo$ID=="V0055"),]
-names(models) <- c("GY","PH","PL")
+names(models) <- c("Grain Yield","Plant Height","Plant Lodging")
 
 
 BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(2,1,1),int = 0.1,save.df = T,verbose = T )
 
 df=print(BPSI_soy)
 
-gen.sel = df[which(df$sel=="selected"),"gen"]
+gen.sel = df[which(df$sel=="Selected"),"gen"]
 
 real.names=distinct(pheno[,c(5,15)])
 
@@ -1113,6 +1113,7 @@ Highlighting the ranking of probability of superior performance per trait of the
 library(knitr)
 
 a=plot(BPSI_soy,category = "Ranks")
+
 a=a+labs(x="Varieties")
 a
 ```
@@ -1171,7 +1172,7 @@ BPSI_soy=BPSI(modlist = models,increase =c(TRUE,FALSE,FALSE),omega = c(3,1,1),in
 
 df=print(BPSI_soy)
 
-gen.sel = df[which(df$sel=="selected"),"gen"]
+gen.sel = df[which(df$sel=="Selected"),"gen"]
 ```
 
 # BPSI plot - w 3,1,1

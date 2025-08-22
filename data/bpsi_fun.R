@@ -148,11 +148,7 @@ class(output)="BPSI"
 library(tidyverse)
 
 
-df.i <- bpsi |> 
-  mutate(id = row_number(),
-         angle = 90 - 360 * (id - 0.5) / n(),
-         hjust = ifelse(angle < -90, 1, 0),
-         angle = ifelse(angle < -90, angle + 180, angle))
+
 
       
       ## Save data frames in the work directory -----------------
@@ -259,7 +255,8 @@ df.i <- bpsi |>
 ##' plot(results, category = "joint")
 #' }
 #'
-ls();BPSI_result=BPSI_soy
+
+
 plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
 
   obj = BPSI_result
@@ -276,7 +273,15 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
   #ord_gen = factor(obj$across$perfo$ID, levels = obj$across$perfo$ID)
   #retrieve = function(x) do.call(rbind, strsplit(x, '@#_'))[,1]
   obj$gen=rownames(obj)
-  traits <- colnames(obj)[!colnames(obj) %in% c("bpsi","sel","gen")]
+  
+  
+  obj <- obj |> 
+    mutate(id = row_number(),
+           angle = 90 - 360 * (id - 0.5) / n(),
+           hjust = ifelse(angle < -90, 1, 0),
+           angle = ifelse(angle < -90, angle + 180, angle))
+  
+  traits <- colnames(obj)[!colnames(obj) %in% c("bpsi","sel","gen", "angle", "hjust","id")]
   obja=obj
   
   library(tidyverse)
@@ -336,7 +341,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
     
   
     
-    ggplot(df.i, aes(x = as.factor(id), y = bpsi, fill = sel)) +
+    ggplot(obj, aes(x = as.factor(id), y = bpsi, fill = sel)) +
       geom_col(color = "black", width = 1) +
       scale_fill_manual(values = c("Selected" = "navyblue",
                                    "Not_Selected" = "gray"),
