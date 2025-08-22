@@ -798,12 +798,12 @@ load("Saves/varcomp.rda")
 library(tidyverse)
 head(varcomp)
 
-varcomp[grepl("error",varcomp$effect),"type"] <- "error"
-varcomp[grepl("geno",varcomp$effect),"type"] <- "G"
+varcomp[grepl("error",varcomp$effect),"type"] <- "Error"
+varcomp[grepl("geno",varcomp$effect),"type"] <- "V"
 varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Y"
 varcomp[grepl("LOCATION_NAME",varcomp$effect),"type"] <- "L"
-varcomp[grepl("geno:CROP",varcomp$effect),"type"] <- "GxY"
-varcomp[grepl("geno:LOC",varcomp$effect),"type"] <- "GxL"
+varcomp[grepl("geno:CROP",varcomp$effect),"type"] <- "VxY"
+varcomp[grepl("geno:LOC",varcomp$effect),"type"] <- "VxL"
 varcomp[grepl("rep",varcomp$effect),"type"] <- "R"
 
 custom_palette=viridis::turbo(n = 19)
@@ -812,11 +812,11 @@ unique(varcomp$effect)
 vc=varcomp |> ggplot(aes(x=type,y=var, fill = effect)) + geom_col(position = "stack", just = 0.5) + theme(axis.text.x = element_text(angle=90),strip.text = element_text(face = "bold"))+ facet_wrap(~trait,scales="free") +labs(x="Effects",y="Variance components",fill="Effects")+
     scale_fill_manual(
     values = custom_palette, 
-    labels = c("rep"="R", "geno"="G", "LOCATION_NAME"="L","geno:LOCATION_NAME"="GxL",
- "CROP_SEASON"="Y", "geno:CROP_SEASON"="GxY", "error_env1"= "e_env1", "error_env2"="e_env2",        
-  "error_env3"="e_env3","error_env4"="e_env4","error_env5"="e_env5","error_env6"="e_env6",        
-"error_env7"="e_env7", "error_env8"="e_env8", "error_env9"="e_env9", "error_env10"="e_env10",
-"error_env11"="e_env11","error_env12"="e_env12","error_env13"="e_env13"));vc
+    labels = c("rep"="R", "geno"="V", "LOCATION_NAME"="L","geno:LOCATION_NAME"="VxL",
+ "CROP_SEASON"="Y", "geno:CROP_SEASON"="VxY", "error_env1"= "E1", "error_env2"="E2",        
+  "error_env3"="E3","error_env4"="E4","error_env5"="E5","error_env6"="E6",        
+"error_env7"="E7", "error_env8"="E8", "error_env9"="E9", "error_env10"="E10",
+"error_env11"="E11","error_env12"="E12","error_env13"="E13"));vc
 
 ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp1.pdf",dpi = "retina",height = 6,width = 8)
 ggsave(plot=vc,device = "png",filename ="Plots/varcomp1.png",dpi = "retina",height = 6,width = 8,bg = "white")
@@ -1113,6 +1113,7 @@ Highlighting the ranking of probability of superior performance per trait of the
 library(knitr)
 
 a=plot(BPSI_soy,category = "Ranks")
+a=a+labs(x="Varieties")
 a
 ```
 
@@ -1128,6 +1129,7 @@ b
 
 
 ```{r bpsi table}
+library(ggpubr)
 plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 1, common.legend = F)
 
 
@@ -1137,8 +1139,8 @@ plot.bpsi = ggarrange(a,b,labels = c("A","B"),ncol = 1, common.legend = F)
 
 
 
-ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 16,width = 12)
-ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 16,width = 12, bg = "white")
+ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 10,width = 12)
+ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 10,width = 12, bg = "white")
 
 BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
 

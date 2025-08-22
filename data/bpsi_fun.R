@@ -92,6 +92,8 @@
 ##' }
 ##'
 
+modlist = models;increase =c(TRUE,FALSE,FALSE);omega = c(2,1,1);int = 0.1;save.df = T;verbose = T 
+
 BPSI = function(modlist, increase = c(TRUE,FALSE,FALSE), omega, int, save.df = FALSE, verbose = FALSE){
 
   stopifnot("Please, provide a valid vector of selection direction" !=is.null(increase))
@@ -135,7 +137,7 @@ gen_i = round((length(gen_sel$bpsi) * int),0)
 
 selected=gen_sel[1:gen_i,]
 
-bpsi$sel=ifelse(rownames(bpsi) %in% rownames(selected) , "selected","not_sel")
+bpsi$sel=ifelse(rownames(bpsi) %in% rownames(selected) , "Selected","Not_Selected")
 bpsi=bpsi[order(bpsi$bpsi,decreasing = F),]
 bpsi$gen=rownames(bpsi)
 if(verbose) message('-> Genotypes selected using BPSI')
@@ -143,7 +145,14 @@ attr(bpsi, "control")=int
 output = list(BPSI=bpsi,df=df) 
 class(output)="BPSI"
 
+library(tidyverse)
 
+
+df.i <- bpsi |> 
+  mutate(id = row_number(),
+         angle = 90 - 360 * (id - 0.5) / n(),
+         hjust = ifelse(angle < -90, 1, 0),
+         angle = ifelse(angle < -90, angle + 180, angle))
 
       
       ## Save data frames in the work directory -----------------
@@ -250,7 +259,7 @@ class(output)="BPSI"
 ##' plot(results, category = "joint")
 #' }
 #'
-
+ls();BPSI_result=BPSI_soy
 plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
 
   obj = BPSI_result
@@ -275,19 +284,21 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
   library(gghighlight)
   obja=obj |> pivot_longer(paste(traits,sep = ":"),names_to = "trait",values_to = "rank")
   
-  selected=obja[which(obja$sel %in% "selected"),]
+  selected=obja[which(obja$sel %in% "Selected"),]
   
  
   
   # Rank plot --------------
   if(category == "Ranks"){
     
+ 
+    
     ggplot() +
             geom_bar(aes(x = reorder(gen,rank), y = rank, 
-                   fill = "selected"), subset(obja, gen %in% selected$gen), 
+                   fill = "Selected"), subset(obja, gen %in% selected$gen), 
                stat = "identity", position = "stack") +
       geom_bar(aes(x = reorder(gen,rank), y = rank, 
-                   fill = "non-selected"),stat = "identity", position = "stack", subset(obja, !gen %in% selected$gen)) +
+                   fill = "Not_Selected"),stat = "identity", position = "stack", subset(obja, !gen %in% selected$gen)) +
       geom_hline(yintercept = max(selected$rank))+
       facet_wrap(~trait) +geom_text_repel(
         data = subset(obja, gen %in% selected$gen),
@@ -300,9 +311,11 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
             legend.position = "top", 
             strip.text = element_text(size = 8)
       ) +
-      scale_fill_manual(values = c("selected" = "navyblue",
-                                   "non-selected" = "gray")) +  
-      labs(x = "Genotypes", y = "Ranking", 
+      scale_fill_manual(values = c("Selected" = "navyblue",
+                                   "Not_Selected" = "gray"),
+                                   breaks = c("Not_Selected","Selected"),
+                                   labels = c("Not selected","Selected")) +  
+      labs(x = "Genotypes", y = "Ranking of superior performance across environments", 
            fill = expression(bold(Pr(g %in% Omega)))) +
       theme(
         axis.text.x = element_text(size = 3, hjust = 1, vjust = 0.5),
@@ -320,42 +333,80 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
   
   # BPSI plot --------------
   else if(category == "BPSI"){
-    ggplot() +
-      geom_col(
-        aes(y = bpsi, x = reorder(gen,bpsi), fill = gen),
-        data = subset(obj, gen %in% selected$gen)
-      )+geom_col(
-        aes(y = bpsi, x = reorder(gen,bpsi)),
-        fill = "gray",
-        data = subset(obj, !gen %in% selected$gen)
-      ) +geom_hline(yintercept = max(selected$bpsi))+
-      scale_fill_manual(values = viridis::turbo(length(unique(selected$gen)))) +
+    
+  
+    
+    ggplot(df.i, aes(x = as.factor(id), y = bpsi, fill = sel)) +
+      geom_col(color = "black", width = 1) +
+      scale_fill_manual(values = c("Selected" = "navyblue",
+                                   "Not_Selected" = "gray"),
+                        guide = "none") +
+      geom_point(data = data.frame(Sel = c("Not_Selected","Selected")),
+                 aes(x = 0, y = 0, color = Sel),
+                 inherit.aes = FALSE, size = 4, alpha = 0) +
+      scale_color_manual(values = c("Selected" = "navyblue",
+                                    "Not_Selected" = "gray"),
+                         breaks = c("Not_Selected","Selected"),
+                         labels = c("Not selected","Selected"),
+                         name = NULL,
+                         guide = guide_legend(override.aes = list(shape = 16,
+                                                                  size = 5,
+                                                                  alpha = 1))) +
+      coord_polar(start = 0) +
+      geom_segment(aes(x = id, xend = id, y = bpsi, yend = max(bpsi) + 5),
+                   color = "gray", linewidth = 0.3) +
+      geom_text(aes(x = id, y = max(bpsi) + 10,
+                    label = gen, angle = angle, hjust = hjust),
+                size = 2.8) +
       theme_minimal() +
-      labs(x = "Generation", y = "BPSI", fill = "Generation") +
-      geom_label_repel(
-        data = subset(obj, gen %in% selected$gen),
-        aes(x = gen, y = bpsi, label = gen),  # Specify x and y aesthetics
-        fill = "lightblue", size = 2.25,
-        box.padding = 0.1, max.overlaps = 20,label.padding = 0.1,
-        label.size = 0.1,max.time = 1.0,
-        nudge_x = 7.0,nudge_y = 7.0,force=10,force_pull = 10,max.iter = 20000
-      ) +
-      gghighlight(gen %in% selected$gen) +
-      geom_hline(
-        aes(yintercept = max(bpsi, na.rm = TRUE), linetype = "BPSI"),  # Handle NA values
-        color = "black"
-      ) +
-      labs(
-        x = "Genotypes", y = "BPSI", , linetype = "selected"
-      ) +guides(fill = "none")+
-      theme(
-        axis.text.x = element_blank(),
-        legend.position = "top",
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12)
-      ) +
-      scale_y_reverse(n.breaks=10) 
+      theme(axis.text = element_blank(),
+            axis.title = element_blank(),
+            panel.grid = element_blank(),
+            legend.position = "top")
+    
+    
+    
+    # ggplot() +
+    #   geom_col(
+    #     aes(y = bpsi, x = reorder(gen,bpsi), fill = gen),
+    #     data = subset(obj, gen %in% selected$gen)
+    #   )+geom_col(
+    #     aes(y = bpsi, x = reorder(gen,bpsi)),
+    #     fill = "gray",
+    #     data = subset(obj, !gen %in% selected$gen)
+    #   ) +geom_hline(yintercept = max(selected$bpsi))+
+    #   scale_fill_manual(values = viridis::turbo(length(unique(selected$gen)))) +
+    #   theme_minimal() +
+    #   labs(x = "Generation", y = "BPSI", fill = "Generation") +
+    #   geom_label_repel(
+    #     data = subset(obj, gen %in% selected$gen),
+    #     aes(x = gen, y = bpsi, label = gen),  # Specify x and y aesthetics
+    #     fill = "lightblue", size = 2.25,
+    #     box.padding = 0.1, max.overlaps = 20,label.padding = 0.1,
+    #     label.size = 0.1,max.time = 1.0,
+    #     nudge_x = 7.0,nudge_y = 7.0,force=10,force_pull = 10,max.iter = 20000
+    #   ) +
+    #   gghighlight(gen %in% selected$gen) +
+    #   geom_hline(
+    #     aes(yintercept = max(bpsi, na.rm = TRUE), linetype = "BPSI"),  # Handle NA values
+    #     color = "black"
+    #   ) +
+    #   labs(
+    #     x = "Genotypes", y = "BPSI", , linetype = "Selected"
+    #   ) +guides(fill = "none")+
+    #   theme(
+    #     axis.text.x = element_blank(),
+    #     legend.position = "top",
+    #     axis.title.y = element_text(size = 12),
+    #     axis.title.x = element_text(size = 12),
+    #     axis.text.y = element_text(size = 12)
+    #   ) +
+    #   scale_y_reverse(n.breaks=10) 
+    
+    
+    
+    
+    
   }
 
 }
