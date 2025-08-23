@@ -950,20 +950,20 @@ display.brewer.all(n=8)
 
 
 PH=PH +   geom_point(aes(  x = PH$data$ID,y = PH$data$prob,
-fill = ifelse(ID %in% gen.sel,  "Selected", "Not selected" )) ,size = 2,shape = 21,stroke = 0.4)+ 
-  labs(y = "Probability of superior performance", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
+fill = ifelse(ID %in% gen.sel,  "Selected", "Not selected" )) ,size = 3,shape = 21,stroke = 0.4)+ 
+  labs(y = "Probability of superior performance", x = "", title = "Plant Height")+theme(axis.text.x = element_text(size = 7, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
   scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 PL=PL +   geom_point(aes(  x = PL$data$ID,y = PL$data$prob,
 fill = ifelse(PL$data$ID %in% gen.sel, "Selected", "Not selected")) 
-,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "Varieties", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
+,size = 3,shape = 21,stroke = 0.4) +guides(fill = "none") +  
+  labs(y = "", x = "Varieties", title = "Plant Lodging")+theme(axis.text.x = element_text(size = 7, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+
   scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 GY=GY +   geom_point(aes(  x = GY$data$ID,y = GY$data$prob,
 fill = ifelse(GY$data$ID %in% gen.sel,  "Selected", "Not selected")) 
-,size = 2,shape = 21,stroke = 0.4) +guides(fill = "none") +  
-  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 5, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
+,size = 3,shape = 21,stroke = 0.4) +guides(fill = "none") +  
+  labs(y = "", x = "", title = "Grain Yield")+theme(axis.text.x = element_text(size = 7, angle = 90, hjust = 1, vjust = 0.5))+ scale_x_discrete(labels = labels)+  scale_fill_manual(  values = c("Selected" = "#E41A1C", "Not selected" ="#377EB8" ),name = "BPSI")
 
 
 library(ggpubr)

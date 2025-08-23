@@ -77,7 +77,7 @@ $$
  \mathbf{y} = \mathbf{X_1b} + \mathbf{Z_1g} + \mathbf{\epsilon} 
 $$
 
-where $\mathbf{y}$ is the vector of phenotypic observations, $\mathbf{b}$  is the vector of fixed effects of replication, $\mathbf{g}$ is the vector of random effects of genotypes and $\mathbf{\epsilon}$ is the vector of random errors. $\mathbf{X_1}$, $\mathbf{X_2}$ e $\mathbf{Z_1}$ are incidence matrix of $\mathbf{b}$ and $\mathbf{g}$ effects respectively..
+where $\mathbf{y}$ is the vector of phenotypic observations, $\mathbf{b}$  is the vector of fixed effects of replication, $\mathbf{g}$ is the vector of random effects of genotypes and $\mathbf{\epsilon}$ is the vector of random errors. $\mathbf{X_1}$, $\mathbf{X_2}$ e $\mathbf{Z_1}$ are incidence matrix of $\mathbf{b}$ and $\mathbf{g}$ effects respectively.
 
 ## Material and Methods
 
