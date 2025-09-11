@@ -84,6 +84,8 @@ pheno[which(pheno$trial==" Mutare_2020"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Stapleford_2019"),"IRRIGATION"] <- "Rainfed"
 pheno[which(pheno$trial=="Stapleford_2020"),"IRRIGATION"] <- "Rainfed"
 
+pheno$geno <- gsub("G_", "V00", pheno$geno ) 
+
 # table(pheno$IRRIGATION)
 # 
 # 
@@ -798,6 +800,14 @@ load("Saves/varcomp.rda")
 library(tidyverse)
 head(varcomp)
 
+varcomps <- varcomp |> mutate(effect=recode(effect,"rep"="R", "geno"="V", "LOCATION_NAME"="L","geno:LOCATION_NAME"="VxL",
+ "CROP_SEASON"="Y", "geno:CROP_SEASON"="VxY", "error_env1"= "E1", "error_env2"="E2",        
+  "error_env3"="E3","error_env4"="E4","error_env5"="E5","error_env6"="E6",        
+"error_env7"="E7", "error_env8"="E8", "error_env9"="E9", "error_env10"="E10",
+"error_env11"="E11","error_env12"="E12","error_env13"="E13"))
+
+varcomps |> kable(format = "latex", booktabs = FALSE, longtable=TRUE)
+
 varcomp[grepl("error",varcomp$effect),"type"] <- "Error"
 varcomp[grepl("geno",varcomp$effect),"type"] <- "V"
 varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Y"
@@ -1135,19 +1145,112 @@ library(ggpubr)
 library(patchwork)
 
 
-plot.bpsi <- wrap_plots(a, b, ncol = 1, heights = c(2, 1)) +
-  plot_annotation(tag_levels = "A")   # Right margin for width
+library(ggplot2)
+library(grid)
+library(gtable)
 
 
-plot.bpsi <- a / b  + plot_layout(ncol = 1,heights = c(1, 2) )
 
+
+# Convert ggplot to gtable
+g1 <- ggplotGrob(a)
+
+# Show the layout to identify which columns contain each facet
+gtable_show_layout(g1)
+
+## Create individual facet plots by extracting the complete panel areas
+# First facet: columns 6-8, rows 8-11
+g1_facet1 <- g1[8:11, 6:8]
+g1_facet1 <- gtable_add_grob(g1_facet1, g1$grobs[[17]], t = 1, l = 2)  # Add strip
+
+# Second facet: columns 10-12, rows 8-11
+g1_facet2 <- g1[8:11, 10:12]
+g1_facet2 <- gtable_add_grob(g1_facet2, g1$grobs[[18]], t = 1, l = 2)  # Add strip
+
+# Third facet: columns 14-16, rows 8-11
+g1_facet3 <- g1[8:11, 14:16]
+g1_facet3 <- gtable_add_grob(g1_facet3, g1$grobs[[19]], t = 1, l = 2)  # Add strip
+
+# Display the 2x2 grid
+# grid.newpage()
+# grid.arrange(
+#   g1_facet1, g1_facet2, g1_facet3, b,
+#   nrow = 2,
+#   ncol = 2
+# )
+# 
+# 
+# library(patchwork)
+# library(grid)
+# library(gridExtra)
+# library(gtable)
+# 
+# # First, ensure each facet has proper margins for separation
+# # Add padding to each facet grob
+# add_padding <- function(grob, padding = unit(10, "pt")) {
+#   # Create a padding grob
+#   padded_grob <- gtable_add_padding(grob, padding)
+#   return(padded_grob)
+# }
+# 
+# # Add padding to each facet
+# g1_facet1_padded <- add_padding(g1_facet1)
+# g1_facet2_padded <- add_padding(g1_facet2)
+# g1_facet3_padded <- add_padding(g1_facet3)
+# b_padded <- add_padding(b)
+# 
+# # Create the 2x2 grid with proper spacing
+# grid.newpage()
+# grid.arrange(
+#   g1_facet1_padded,    # Top left (A)
+#   g1_facet2_padded,    # Top right (B)
+#   g1_facet3_padded,    # Bottom left (C)
+#   b,            # Bottom right (D)
+#   nrow = 2,
+#   ncol = 2,
+#   padding = unit(20, "pt")  # Space between plots
+# )
+# 
+# # Manually add annotation letters
+# grid.text("A", x = 0.01, y = 0.98, gp = gpar(fontsize = 16, fontface = "bold"))
+# grid.text("B", x = 0.50, y = 0.98, gp = gpar(fontsize = 16, fontface = "bold"))
+# grid.text("C", x = 0.01, y = 0.50, gp = gpar(fontsize = 16, fontface = "bold"))
+# grid.text("D", x = 0.50, y = 0.50, gp = gpar(fontsize = 16, fontface = "bold"))
+
+
+# plot.bpsi <- wrap_plots(plot1,plot2,plot3, b, ncol =2, heights = c(2, 1)) +
+#   plot_annotation(tag_levels = "A")   # Right margin for width
+# 
+# 
+# plot.bpsi <- a / b  + plot_layout(ncol = 1,heights = c(1, 2) )
+# 
+
+ wrap1 <- wrap_elements(g1_facet1)
+ wrap2 <- wrap_elements(g1_facet2)
+ wrap3 <- wrap_elements(g1_facet3)
+ # Create the 2x2 layout
+ plot.bpsi <- wrap_plots(
+   A = wrap1, 
+   B = wrap2, 
+   C = wrap3, 
+   D = b,
+   design = "
+   AB
+   CD
+   ",
+   widths = c(1, 1),
+   heights = c(1, 1)
+ ) + plot_annotation(tag_levels = "A")
 
 
 
 ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 8,width = 12)
 ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 8,width = 12, bg = "white")
+```
 
-BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
+
+```{r bpsi table 1}
+BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=FALSE)
 
 ```
 
@@ -1203,7 +1306,7 @@ library(kableExtra)
 
 
 ```{r bpsi table 2}
-BPSI_soy$BPSI |> kable(format = "html", booktabs = TRUE, longtable=TRUE)
+BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=FALSE)
 
 ```
 

@@ -292,33 +292,27 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
   
  
   
+ 
+  
   # Rank plot --------------
   if(category == "Ranks"){
     
  
-    
+    # geom_bar(aes(x = as.factor(gen), y = max(rank) - rank, fill = "Selected"), 
+    #          data = subset(obja, gen %in% selected$gen), 
+    #          stat = "identity") +
+    # geom_bar(aes(x = as.factor(gen), y = max(rank) - rank, fill = "Not_Selected"),
+    #          data = subset(obja, !gen %in% selected$gen), 
+    #          stat = "identity") +    
     ggplot() +
-      geom_bar(aes(x = reorder(gen, rank), y = rank, fill = "Selected"), 
-               data = subset(obja, gen %in% selected$gen), 
-               stat = "identity") +
-      geom_bar(aes(x = reorder(gen, rank), y = rank, fill = "Not_Selected"),
-               data = subset(obja, !gen %in% selected$gen), 
-               stat = "identity") +
-      geom_hline(data = subset(obja, gen %in% selected$gen) %>% group_by(trait) %>% summarize(max_rank = max(rank)),
-                 aes(yintercept = max_rank), linetype = "dashed", color = "red", size = 0.5) +
-      geom_text_repel(
-        data = subset(obja, gen %in% selected$gen),
-        aes(x = reorder(gen, rank), y = rank, label = rank),
-        size = 2.25,
-        box.padding = 0.1, 
-        max.overlaps = 20,
-        direction = "y",
-        nudge_y = -0.5,
-        segment.size = 0.2
-      ) +
+      geom_col( aes(x = gen,y = max(rank) - rank, fill=sel),data=obja)+
+
+      # geom_hline(data = subset(obja, gen %in% selected$gen) %>% group_by(trait) %>% summarize(max_rank = max(rank)),
+      #            aes(yintercept = max_rank), linetype = "dashed", color = "red", size = 0.5) +
+      
       facet_wrap(~trait, scales = "free_x") +
       theme(
-        axis.text.x = element_text(size = 3, angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.x = element_text(size = 4, angle = 90, hjust = 1, vjust = 0.5),
         panel.background = element_blank(),
         legend.position = "top",
         strip.text = element_text(size = 8,face = "bold")) +
@@ -331,8 +325,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
         x = "Genotypes", 
         y = "Ranking of superior performance", 
         fill = expression(bold(Pr(g %in% Omega)))
-      ) +
-      scale_y_reverse(n.breaks = 10)
+      )
 
 
     
@@ -345,7 +338,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
     
   
     
-    ggplot(obj, aes(x = as.factor(id), y = bpsi, fill = sel)) +
+    ggplot(obj, aes(x = as.factor(id), y = max(bpsi) - bpsi, fill = sel)) +  # Reverse values
       geom_col() +
       scale_fill_manual(values = c("Selected" = "blue3",
                                    "Not_Selected" = "grey"),
@@ -359,17 +352,19 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
                          name = NULL,
                          guide = "none") +
       coord_polar(start = 0) +
-      geom_segment(aes(x = id, xend = id, y = bpsi, yend = max(bpsi) + 5),
+      geom_segment(aes(x = id, xend = id, y = max(bpsi) - bpsi, yend = max(bpsi) + 5),  # Adjusted
                    color = "grey100", linewidth = 0.3) +
-      geom_text(aes(x = id, y = max(bpsi) + 10,
+      geom_text(aes(x = id, y = max(bpsi) + 10,  # Keep original positioning
                     label = gen, angle = angle, hjust = hjust),
                 size = 2.8) +
       theme_minimal() +
       theme(axis.text = element_blank(),
             axis.title = element_blank(),
             panel.grid = element_blank(),
-            legend.position = "top")+labs(fill=NULL)
-    
+            legend.position = "top") +
+      labs(fill = NULL) +
+      # Remove any axis labels that might show transformed values
+      scale_y_continuous(labels = NULL)
     
     
     # ggplot() +
