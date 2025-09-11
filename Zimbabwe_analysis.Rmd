@@ -800,11 +800,11 @@ str(outs_PH$ppcheck)
 str(a)
 
 outs_PH$ppcheck=cbind(outs_PH$ppcheck, trait="Plant Height")
-outs_PL$ppcheck=cbind(outs_PH$ppcheck, trait="Plant Lodging")
-outs_GY$ppcheck$trait="Grain Yield"
+outs_PL$ppcheck=cbind(outs_PL$ppcheck, trait="Plant Lodging")
+outs_GY$ppcheck=cbind(outs_GY$ppcheck, trait="Grain Yield")
 
 ppcheck=rbind(outs_GY$ppcheck,outs_PH$ppcheck,outs_PL$ppcheck)
-save(varcomp,file = "Saves/varcomp.rda")
+save(ppcheck,file = "Saves/ppcheck.rda")
 
 
 load("Saves/varcomp.rda")
