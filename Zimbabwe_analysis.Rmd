@@ -789,12 +789,23 @@ outs_PL=readRDS("Saves/outs_PL_year.rds")
 outs_GY=readRDS("Saves/outs_GY_year.rds")
 
 
+
 outs_PH$variances$trait="Plant Height"
 outs_PL$variances$trait="Plant Lodging"
 outs_GY$variances$trait="Grain Yield"
 
 varcomp=rbind(outs_GY$variances,outs_PH$variances,outs_PL$variances)
 save(varcomp,file = "Saves/varcomp.rda")
+str(outs_PH$ppcheck)
+str(a)
+
+outs_PH$ppcheck=cbind(outs_PH$ppcheck, trait="Plant Height")
+outs_PL$ppcheck=cbind(outs_PH$ppcheck, trait="Plant Lodging")
+outs_GY$ppcheck$trait="Grain Yield"
+
+ppcheck=rbind(outs_GY$ppcheck,outs_PH$ppcheck,outs_PL$ppcheck)
+save(varcomp,file = "Saves/varcomp.rda")
+
 
 load("Saves/varcomp.rda")
 library(tidyverse)
