@@ -1250,7 +1250,7 @@ ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "reti
 
 
 ```{r bpsi table 1}
-BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=FALSE)
+BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE, row.names = F)
 
 ```
 
