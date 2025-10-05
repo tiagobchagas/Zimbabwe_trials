@@ -29,13 +29,17 @@
 ##' population of environments or for a specific environment. `prob_sup`
 ##' computes the probabilities of superior performance and the probabilities of superior stability:
 ##'
-##' \itemize{\item Probability of superior performance}
+##' \itemize{\item Bayesian Probabilistic Selection Index}
 ##'
 ##' 
-##' \deqn{BPSI_{i}=\sum_{m=1}^t \frac{RankProSup}{\omega}}
+##' \deqn{BPSI_{i}=\sum_{m=1}^t \frac{\gamma^t}{\omega^t}}
 ##'
-##' where \eqn{t} is the total number of traits evaluated \eqn{\left(m = 1, 2, ..., t \right)},
+##' where \eqn{\gamma} is the probability of superior performance of genotype
+##'  \eqn{i} for trait \eqn{m}, 
+##'  \eqn{t} is the total number of traits evaluated,
+##'   \eqn{\left(m = 1, 2, ..., t \right)},
 ##' and \eqn{\omega} is the weight for each trait.
+##'
 ##'
 ##' 
 ##' More details about the usage of `BPSI`, as well as the other function of
@@ -54,7 +58,12 @@
 ##' Chaves, S. F. S., Krause, M. D., Dias, L. A. S., Garcia, A. A. F., & Dias, K. O. G. (2024).
 ##' ProbBreed: a novel tool for calculating the risk of cultivar recommendation in multienvironment trials.
 ##' G3 Genes|Genomes|Genetics, 14(3). 
-##' \doi{https://doi.org/10.1093/G3JOURNAL/JKAE013}
+##' 
+##' Chagas, J. T. B., Dias, K. O. das G., Quintão Carneiro, V., de Oliveira, L. M. C., Nunes, N. X., Júnior, J. D. P., Carneiro, P. C. S., & Carneiro, J. E. de S. (2025). 
+##' Bayesian probabilistic selection index in the selection of common bean families.
+##'  Crop Science, 65(3).
+##' 
+##' \doi{https://doi.org/10.1002/CSC2.70072}
 ##'
 ##'
 ##' @import ggplot2
@@ -67,29 +76,60 @@
 ##' @export
 ##'
 ##' @examples
-##' \donttest{
-##' mod = bayes_met(data = maize,
-##'                 gen = "Hybrid",
-##'                 loc = "Location",
-##'                 repl = c("Rep","Block"),
-##'                 trait = "GY",
-##'                 reg = "Region",
-##'                 year = NULL,
-##'                 res.het = TRUE,
-##'                 iter = 2000, cores = 2, chain = 4)
+#' \donttest{
+##' source("Data/bpsi_fun.R")
+##' 
+##' 
+##' library(ProbBreed)
+##' library(tidyverse)
+##' models=list(mod,mod2,mod3)
+##' models <- vector("list",length(mods))
+##' names(models) <- c("GY","LOD","CB")
+##' str(models)
+##' outs= vector("list",length(models))
+##' names(outs) <- c("GY","LOD","CB")
+##' 
+##' for (mods in 1:length(models)) {
+##'   a= extr_outs(model = models[[mods]],
+##'              probs = c(0.05, 0.95),
+##'                       verbose = TRUE)
+##'                       outs[[mods]]=a
+##'                         rm(a)
+##'                         }
+##'                         
+##' results= vector("list",length(outs))
+##' names(results) <- c("GY","LOD","CB")
+##' inc=c(TRUE,FALSE,FALSE)
+##' 
+##'               for (mods in 1:length(outs)) {
+##'                         a = prob_sup(extr = outs[[mods]], 
+##'                         int = .2,
+##'                         increase = inc[[mods]], 
+##'                         save.df = FALSE, 
+##'                         verbose = TRUE)
+##'                         results[[mods]]=a
+##'                         rm(a)
+##'                         }
+##' saveRDS(results,file = "results.rds")
+##' 
+##' results=readRDS("results.rds")
+##' source("bpsi_fun.R")
+##' 
+##' bpsi=BPSI(modlist=results,
+##'  increase = c(TRUE,FALSE,FALSE),
+##'  int = 0.1,
+##'  omega=c(2,1,1),
+##'  save.df = F,
+##'  verbose = T)
+##'         
 ##'
-##' outs = extr_outs(model = mod,
-##'                  probs = c(0.05, 0.95),
-##'                  verbose = TRUE)
 ##'
-##' results = prob_sup(extr = outs,
-##'                    int = .2,
-##'                    increase = TRUE,
-##'                    save.df = FALSE,
-##'                    verbose = FALSE)
-##'                    
-##'                    
-##' }
+##' plot(bpsi,category = "Ranks")
+##' 
+##' plot(bpsi,category = "BPSI")
+##' 
+##' df=print(BPSI_soy)
+#' }
 ##'
 
 
@@ -174,23 +214,30 @@ library(tidyverse)
 #' Build plots using the outputs stored in the `BPSI` object.
 #'
 #'
-#' @param x An object of class `BPSI`.
-#' @param category A string indicating which plot to build. See options in the Details section.
-
-#' @param ... currently not used
-#' @method plot BPSI
-#'
-#' @details The available options are:
-##' Probabilities provide the risk of recommending a selection candidate for a target
-##' population of environments or for a specific environment. `prob_sup`
-##' computes the probabilities of superior performance and the probabilities of superior stability:
+#' @param modlist A list of object of class `probsup`, obtained from the [ProbBreed::prob_sup] function
+##' @param increase Logical vector of amount of traits used in the same order of modlist.`TRUE` (default) if the selection is for increasing the trait value, `FALSE` otherwise.
+##' @param omega A numeric representing the weigth of each trait, the default is 1, the trait with more 
+##' economic interest should be greater.
+##' @param int A numeric representing the selection intensity
+##' (between 0 and 1)
+##'##' @param save.df Logical. Should the data frames be saved in the work directory?
+##' `TRUE` for saving, `FALSE` (default) otherwise.
+##' @param verbose A logical value. If `TRUE`, the function will indicate the
+##' completed steps. Defaults to `FALSE`.
+##'
+##' @return The function returns an object of class `BPSI`, which contains two lists,
+##' one with the `BPSI`- Bayesian Probabilistic Selection Index, and another with the original `data`-  
+##' with across-environments probabilities for each trait.
 ##'
 ##' \itemize{\item Probability of superior performance}
 ##'
 ##' 
-##' \deqn{BPSI_{i}=\sum_{m=1}^t \frac{RankProSup}{\omega}}
+##' \deqn{BPSI_{i}=\sum_{m=1}^t \frac{\gamma^t}{\omega^t}}
 ##'
-##' where \eqn{t} is the total number of traits evaluated \eqn{\left(m = 1, 2, ..., t \right)},
+##' where \eqn{\gamma} is the probability of superior performance of genotype
+##'  \eqn{i} for trait \eqn{m}, 
+##'  \eqn{t} is the total number of traits evaluated,
+##'   \eqn{\left(m = 1, 2, ..., t \right)},
 ##' and \eqn{\omega} is the weight for each trait.
 ##'
 ##' 
@@ -209,8 +256,13 @@ library(tidyverse)
 ##' 
 ##' Chaves, S. F. S., Krause, M. D., Dias, L. A. S., Garcia, A. A. F., & Dias, K. O. G. (2024).
 ##' ProbBreed: a novel tool for calculating the risk of cultivar recommendation in multienvironment trials.
-##' G3 Genes|Genomes|Genetics, 14(3). 
-##' \doi{https://doi.org/10.1093/G3JOURNAL/JKAE013}
+##' G3 Genes|Genomes|Genetics, 14(3).
+##' 
+##' Chagas, J. T. B., Dias, K. O. das G., Quintão Carneiro, V., de Oliveira, L. M. C., Nunes, N. X., Júnior, J. D. P., Carneiro, P. C. S., & Carneiro, J. E. de S. (2025). 
+##' Bayesian probabilistic selection index in the selection of common bean families.
+##'  Crop Science, 65(3).
+##' 
+##' \doi{https://doi.org/10.1002/CSC2.70072}
 #'
 #'
 #' @seealso  [ProbBreed::prob_sup]
@@ -224,34 +276,34 @@ library(tidyverse)
 #'
 #' @examples
 #' \donttest{
-##' mod = bayes_met(data = maize,
-##'                 gen = "Hybrid",
-##'                 loc = "Location",
-##'                 repl = c("Rep","Block"),
-##'                 trait = "GY",
-##'                 reg = "Region",
-##'                 year = NULL,
-##'                 res.het = TRUE,
-##'                 iter = 2000, cores = 2, chain = 4)
+##' source("Data/bpsi_fun.R")
+##' 
+##' 
+##' load("res_PL_year.rda")
+##' load("res_PH_year.rda")
+##' load("res_GY_year.rda")
+##' 
+##' source("data/bpsi_fun.R")
+##' 
+##' models= vector("list",length(3))
+##' models[[1]] = res_GY;
+##' models[[2]] = res_PH
+##' models[[3]] = res_PL
+##' 
+##' bpsi=BPSI(modlist=results,
+##'  increase = c(TRUE,FALSE,FALSE),
+##'  int = 0.1,
+##'  omega=c(2,1,1),
+##'  save.df = F,
+##'  verbose = T)
+##'         
 ##'
-##' outs = extr_outs(model = mod,
-##'                  probs = c(0.05, 0.95),
-##'                  verbose = TRUE)
 ##'
-##' results = prob_sup(extr = outs,
-##'                    int = .2,
-##'                    increase = TRUE,
-##'                    save.df = FALSE,
-##'                    verbose = FALSE)
-##'
-##' plot(results, category = "hpd")
-##' plot(results, category = "perfo", level = "across")
-##' plot(results, category = "perfo", level = "within")
-##' plot(results, category = "stabi")
-##' plot(results, category = "pair_perfo", level = "across")
-##' plwithin = plot(results, category = "pair_perfo", level = "within")
-##' plot(results, category = "pair_stabi")
-##' plot(results, category = "joint")
+##' plot(bpsi,category = "Ranks")
+##' 
+##' plot(bpsi,category = "BPSI")
+##' 
+##' df=print(BPSI_soy)
 #' }
 #'
 

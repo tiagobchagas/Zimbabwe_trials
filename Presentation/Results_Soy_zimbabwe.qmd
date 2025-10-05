@@ -1,8 +1,14 @@
 ---
-title: "Selection of superior soybean genotypes across locations and years in Zimbabwe according to multitrait ideotype"
+title: "Leveraging probabilistic models to enhance cultivar recommendation through GxE interaction and multi-trait selection in Zimbabwe"
 author: 
 - Chagas, J.T.B
 - Araújo, M.S.
+- Martinez, M.
+- Pavan, J.P.S.
+- Chigeza, G.
+- Santos, Michelle F.
+- Diers, B.W.
+- Goldsmith, P.
 - Pinheiro, J.B.
 format:
   revealjs:
@@ -48,7 +54,8 @@ classify genotypes using Bayesian Probabilistic Selection Index [@Chagas2025]
 
 ## Goal
 ::: {.callout-important .justify icon="true" title=""}
-Select superior soybean genotypes to grain yield, plant height and plant lodging using Bayesian probabilistic selection index (BPSI) [@Chagas2025]
+Select superior soybean genotypes to grain yield, plant height and plant
+lodging using Bayesian probabilistic selection index (BPSI) [@Chagas2025]
 
 :::
 
@@ -357,10 +364,8 @@ plot(BPSI_soy,category = "BPSI")
 
 
 
-## Title?
+## Questions?
 
-- Selection of superior soybean genotypes across locations and years in Zimbabwe according to multitrait ideotype
-- Multitrait selection of soybean varieties using Bayesian probabilistic selection index
 -   josetchagas\@usp.br
 -   Obrigado!
 

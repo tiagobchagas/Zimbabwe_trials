@@ -112,6 +112,9 @@ data_vis=ggplot(data = pheno_long, aes(x=trait, y= value, color=trait)) +
   geom_boxplot() +
   geom_point( position = "jitter", alpha = 0.5) +  facet_nested(trait~LOCATION_NAME+CROP_SEASON, scales = "free_y") +
   theme_bw();data_vis
+
+unique(pheno$TRIAL_NAME)
+unique(pheno$LOCATION_NAME)
 ```
 
 
@@ -585,6 +588,7 @@ stvcl= stvc |> select(geno, error, trait, env, geno_sig) |> pivot_longer(geno:er
   
 library(ggh4x)
 # Get unique environments
+
 unique_envs <- unique(stvc$env)
 
 # Create the shortened names (first 3 letters + last 2 numbers)
@@ -694,7 +698,7 @@ diagnostic = do.call(rbind, lapply(stmt, function(x){
 library(ProbBreed)
 # head(pheno_filt)
 
-i=traits[3]
+i=traits[2]
 
 # Getting the path of your current open file
 # current_path = rstudioapi::getActiveDocumentContext()$path 
@@ -709,7 +713,7 @@ for (i in traits) {
     which(pheno$trial %in% diagnostic[which(diagnostic$trait == i &
                                                diagnostic$sig == "*"), "env"]), ])
   
-
+unique(pheno_filt$LOCATION_NAME)
    
   dim(pheno_filt)
   mod = bayes_met(data = pheno_filt,
@@ -804,20 +808,23 @@ outs_PL$ppcheck=cbind(outs_PL$ppcheck, trait="Plant Lodging")
 outs_GY$ppcheck=cbind(outs_GY$ppcheck, trait="Grain Yield")
 
 ppcheck=rbind(outs_GY$ppcheck,outs_PH$ppcheck,outs_PL$ppcheck)
-save(ppcheck,file = "Saves/ppcheck.rda")
 
+save(ppcheck,file = "Saves/ppcheck.rda")
+ppcheck |> kableExtra::kable(format = "latex", booktabs = TRUE, longtable=TRUE)
+
+load("Saves/ppcheck.rda")
 
 load("Saves/varcomp.rda")
 library(tidyverse)
 head(varcomp)
-
+View(varcomp)
 varcomps <- varcomp |> mutate(effect=recode(effect,"rep"="R", "geno"="V", "LOCATION_NAME"="L","geno:LOCATION_NAME"="VxL",
  "CROP_SEASON"="Y", "geno:CROP_SEASON"="VxY", "error_env1"= "E1", "error_env2"="E2",        
   "error_env3"="E3","error_env4"="E4","error_env5"="E5","error_env6"="E6",        
 "error_env7"="E7", "error_env8"="E8", "error_env9"="E9", "error_env10"="E10",
 "error_env11"="E11","error_env12"="E12","error_env13"="E13"))
 
-varcomps |> kable(format = "latex", booktabs = FALSE, longtable=TRUE)
+varcomps |> kableExtra:: kable(format = "latex", booktabs = FALSE, longtable=TRUE)
 
 varcomp[grepl("error",varcomp$effect),"type"] <- "Error"
 varcomp[grepl("geno",varcomp$effect),"type"] <- "V"
@@ -884,6 +891,7 @@ ggsave(plot=plot.density,device = "png",filename ="Plots/plots_density.png",dpi 
 
 ## Probsup within locations
 ```{r,eval=FALSE}
+
 rm(list=ls())
 
 
@@ -917,12 +925,14 @@ labels <- function(x) {
 
 
 
-GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties",caption = "Selected varieties are highlighted in red")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties",caption = "Selected varieties are highlighted in red")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
-+
-  scale_fill_manual(  values = c("Selected" = "#377EB8", "Not Selected" = "#E41A1C"),name = "BPSI")
+ PH$data  <- PH$data %>% filter(fac != "CROP_SEASON")
 
-PH=PH+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Height",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+ 
+PH=PH+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Height",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ 
+scale_y_discrete(labels = labels)
+
 PL=PL+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Lodging",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
 library(ggpubr)
