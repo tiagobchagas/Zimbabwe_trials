@@ -645,7 +645,7 @@ head(stvc)
 stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year) |> pivot_longer(H2:CV) |>  
   ggplot()+ geom_boxplot(aes(x=envs,y=value, fill=envs))+
   facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
-                                                     strip.text = element_text(face = "bold")) + labs(x= "Environments", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_env
+                                                     strip.text = element_text(face = "bold")) + labs(x= "Location", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_env
 
 stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year) |> pivot_longer(H2:CV) |>  
   ggplot()+ geom_boxplot(aes(x=year,y=value, fill=year))+
