@@ -817,34 +817,75 @@ load("Saves/ppcheck.rda")
 load("Saves/varcomp.rda")
 library(tidyverse)
 head(varcomp)
-View(varcomp)
-varcomps <- varcomp |> mutate(effect=recode(effect,"rep"="R", "geno"="V", "LOCATION_NAME"="L","geno:LOCATION_NAME"="VxL",
- "CROP_SEASON"="Y", "geno:CROP_SEASON"="VxY", "error_env1"= "E1", "error_env2"="E2",        
+# View(varcomp)
+
+
+varcomp <- varcomp |> mutate(effects=recode(effect,"rep"="Replication", "geno"="Variety", "LOCATION_NAME"="Location","geno:LOCATION_NAME"="Variety x Location",
+ "CROP_SEASON"="Year", "geno:CROP_SEASON"="Variety x Year", "error_env1"= "E1", "error_env2"="E2",        
   "error_env3"="E3","error_env4"="E4","error_env5"="E5","error_env6"="E6",        
 "error_env7"="E7", "error_env8"="E8", "error_env9"="E9", "error_env10"="E10",
 "error_env11"="E11","error_env12"="E12","error_env13"="E13"))
 
+
+str(varcomp)
+
 varcomps |> kableExtra:: kable(format = "latex", booktabs = FALSE, longtable=TRUE)
 
 varcomp[grepl("error",varcomp$effect),"type"] <- "Error"
-varcomp[grepl("geno",varcomp$effect),"type"] <- "V"
-varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Y"
-varcomp[grepl("LOCATION_NAME",varcomp$effect),"type"] <- "L"
-varcomp[grepl("geno:CROP",varcomp$effect),"type"] <- "VxY"
-varcomp[grepl("geno:LOC",varcomp$effect),"type"] <- "VxL"
-varcomp[grepl("rep",varcomp$effect),"type"] <- "R"
+varcomp[grepl("geno",varcomp$effect),"type"] <- "Variety"
+varcomp[grepl("CROP_SEASON",varcomp$effect),"type"] <- "Year"
+varcomp[grepl("LOCATION_NAME",varcomp$effect),"type"] <- "Location"
+varcomp[grepl("geno:CROP",varcomp$effect),"type"] <- "Variety x Year"
+varcomp[grepl("geno:LOC",varcomp$effect),"type"] <- "Variety x Location"
+varcomp[grepl("rep",varcomp$effect),"type"] <- "Replication"
 
 custom_palette=viridis::turbo(n = 19)
 
 unique(varcomp$effect)
-vc=varcomp |> ggplot(aes(x=type,y=var, fill = effect)) + geom_col(position = "stack", just = 0.5) + theme(axis.text.x = element_text(angle=90),strip.text = element_text(face = "bold"))+ facet_wrap(~trait,scales="free") +labs(x="Effects",y="Variance components",fill="Effects")+
-    scale_fill_manual(
+
+
+
+
+
+# Assuming varcomp is your data frame
+# Define the desired order of levels based on the labels in scale_fill_manual
+effect_levels <- c("rep", "geno", "LOCATION_NAME", "geno:LOCATION_NAME", 
+                   "CROP_SEASON", "geno:CROP_SEASON", "error_env1", 
+                   "error_env2", "error_env3", "error_env4", "error_env5", 
+                   "error_env6", "error_env7", "error_env8", "error_env9", 
+                   "error_env10", "error_env11", "error_env12", "error_env13")
+
+# Define the corresponding labels
+effect_labels <- c("Replication", "Variety", "Location", "Variety x Location", 
+                   "Year", "Variety x Year", "E1", "E2", "E3", "E4", "E5", 
+                   "E6", "E7", "E8", "E9", "E10", "E11", "E12", "E13")
+
+# Convert varcomp$effect to a factor with the specified levels and labels
+varcomp$effect <- factor(varcomp$effect, 
+                         levels = effect_levels, 
+                         labels = effect_labels)
+
+# Your ggplot code
+library(ggplot2)
+
+vc <- varcomp |> 
+  ggplot(aes(x = type, y = var, fill = effect)) + 
+  geom_col(position = "stack", just = 0.5) + 
+  theme(axis.text.x = element_text(angle = 90), 
+        strip.text = element_text(face = "bold")) + 
+  facet_wrap(~trait, scales = "free") +
+  labs(x = "Effects", y = "Variance components", fill = "Effects") +
+  scale_fill_manual(
     values = custom_palette, 
-    labels = c("rep"="R", "geno"="V", "LOCATION_NAME"="L","geno:LOCATION_NAME"="VxL",
- "CROP_SEASON"="Y", "geno:CROP_SEASON"="VxY", "error_env1"= "E1", "error_env2"="E2",        
-  "error_env3"="E3","error_env4"="E4","error_env5"="E5","error_env6"="E6",        
-"error_env7"="E7", "error_env8"="E8", "error_env9"="E9", "error_env10"="E10",
-"error_env11"="E11","error_env12"="E12","error_env13"="E13"));vc
+    labels = effect_labels  # Use the same labels as in the factor
+  )
+
+# Display the plot
+print(vc)
+
+
+
+
 
 ggsave(plot=vc,device = "pdf",filename ="Plots/varcomp1.pdf",dpi = "retina",height = 6,width = 8)
 ggsave(plot=vc,device = "png",filename ="Plots/varcomp1.png",dpi = "retina",height = 6,width = 8,bg = "white")
@@ -925,7 +966,7 @@ labels <- function(x) {
 
 
 
-GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties",caption = "Selected varieties are highlighted in red")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
  PH$data  <- PH$data %>% filter(fac != "CROP_SEASON")
 
@@ -1072,7 +1113,7 @@ PL=c +
   theme(    panel.background = element_blank(), legend.position = "top", legend.direction = "horizontal",
           axis.text.y = element_text(color = ifelse(  c$data$y %in% highlighted_obs , "red", "black"), size = 7), strip.text = element_text(size = 16)) +
           scale_fill_viridis_c(direction = 1, na.value = "white",
-            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Lodging",x="",y="",caption = "Selected varieties are highlighted in red")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
+            limits = c(0, 1), option = "turbo") + guides(fill = guide_colorbar(barwidth = 7, barheight = 1.5, title.position = "top", title.hjust = 0.5)) + labs(title = "Plant Lodging",x="",y="")+ scale_x_discrete(labels = labels)+ scale_y_discrete(labels = labels)
 
 
 
