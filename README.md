@@ -1,6 +1,6 @@
 # Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe
 
-José Tiago B. Chagas¹*, Mauricio S. Araújo¹, Marcela Martinez¹, João P. S. Pavan¹, Erica P. Leles², Michelle F. Santos², Brian W. Diers², Peter Goldsmith², Learnmore Mwadzingeni³, Ronica Mukaro⁴, Andrew Henderson⁵, Charles Mutimaamba⁶, Andrew Scaboo⁷, José Baldin Pinheiro¹*  
+José Tiago B. Chagas*, Mauricio S. Araújo, Marcela Martinez, João P. S. Pavan, Erica P. Leles, Michelle F. Santos, Brian W. Diers, Peter Goldsmith, Learnmore Mwadzingeni, Ronica Mukaro, Andrew Henderson, Charles Mutimaamba, Andrew Scaboo, José Baldin Pinheiro*  
 
 \*Corresponding authors: josetchagas@usp.br, jbaldin@usp.br  
 
