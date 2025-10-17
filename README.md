@@ -26,8 +26,6 @@ Cultivar recommendation is a critical stage in plant breeding programs, and sele
 
 ---
 
----
-
 ### Repository structure
 
 This repository is organized into several directories and files to ensure transparency, reproducibility, and easy navigation of the Bayesian Probabilistic Selection Index (BPSI) analysis pipeline for soybean trials in Zimbabwe.
