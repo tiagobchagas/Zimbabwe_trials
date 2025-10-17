@@ -46,9 +46,7 @@ Zimbabwe_trials/
 ├─ Zimbabwe_trials.Rproj # RStudio project file
 └─ README.md # Project documentation
 
-
 ---
-
 ### Reproducibility
 
 **Requirements:**
@@ -61,7 +59,6 @@ Zimbabwe_trials/
 rmarkdown::render("Zimbabwe_analysis.Rmd", clean = TRUE)
 
 ---
-
 ### Reproducibility
 
 **Requirements:**
