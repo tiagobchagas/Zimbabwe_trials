@@ -1,52 +1,46 @@
+# Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe
+
+**Authors:**  
+José Tiago B. Chagas¹*, Mauricio S. Araújo¹, Marcela Martinez¹, João P. S. Pavan¹,  
+Erica P. Leles², Michelle F. Santos², Brian W. Diers², Peter Goldsmith²,  
+Learnmore Mwadzingeni³, Ronica Mukaro⁴, Andrew Henderson⁵,  
+Charles Mutimaamba⁶, Andrew Scaboo⁷, José Baldin Pinheiro¹*  
+
+\*Corresponding authors: josetchagas@usp.br, jbaldin@usp.br  
 
 ---
 
-## Key figure
+### 🧬 Dataset description
 
-> Se o arquivo existe em `Plots/Map.jpg`, o GitHub renderiza automaticamente:
+This repository contains the data and analysis scripts used in the study  
+**“Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe.”**  
+The dataset is part of the **Pan-African Soybean Trials Network**, aiming to identify  
+superior soybean varieties across multiple environments and years using a  
+**Bayesian Probabilistic Selection Index (BPSI)**.  
+
+A total of **97 soybean varieties** were evaluated in **37 environments** over  
+**six crop seasons in Zimbabwe**, with measurements for **grain yield, plant height,**  
+and **lodging**. The Bayesian framework integrates the probability of superior  
+performance within and across environments, providing a risk-aware approach  
+to cultivar recommendation under heterogeneous conditions.
+
+---
+
+### 🛰️ Map of trial locations
 
 ![Map of Zimbabwe trials](Plots/Map.jpg)
 
 ---
 
-## Quick start (reproducibility)
+### 📄 Abstract
 
-1. **Requisitos**
-   - R ≥ 4.3
-   - Pacotes principais: `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`, `cowplot`, `readr`, `readxl`, `here`, `janitor`, `kableExtra`, e os pacotes usados no BPSI (listar aqui: `brms`/`rstanarm`/`bayesplot`/etc., conforme seu pipeline).
+Cultivar recommendation is a critical stage in plant breeding programs, and selecting superior varieties for multiple traits remains a challenge due to the variety × environment (V×E) interaction. The Pan-African Trials Network aims to expand soybean cultivar recommendations across new tropical and subtropical regions. However, varieties exhibit distinct adaptation patterns across environments. Bayesian probabilistic models offer a way to manage cultivar recommendation risk through the V×E interaction.
 
-2. **Executar a análise**
-   - Abra `Zimbabwe_trials.Rproj`
-   - Rode/teça o `Zimbabwe_analysis.Rmd`:
-     ```r
-     rmarkdown::render("Zimbabwe_analysis.Rmd", clean = TRUE)
-     ```
-   - Figuras serão salvas em `Plots/` e objetos em `Saves/`.
+This study aimed to identify soybean varieties with high probabilities of superior performance across years and locations using a Bayesian Probabilistic Selection Index (BPSI) in a multi-trait and multi-environment framework. Ninety-seven soybean varieties were evaluated across 37 environments and six crop seasons in Zimbabwe using a randomized complete block design with three replications. Traits evaluated included grain yield, plant height, and lodging. The probability of superior performance was estimated using a 20% selection intensity for each trait and 10% for the multi-trait index. Plant height showed the highest experimental precision, whereas grain yield exhibited greater variability across environments. Most varieties performed better across groups of years than groups of locations, indicating stronger variety × location than variety × year interaction.
 
-3. **Reprodutibilidade**
-   - Fixe versões de pacotes (ex.: via `renv`) e registre a sessão no final do Rmd:
-     ```r
-     sessionInfo()
-     ```
+The BPSI identified ten varieties with high probabilities of superior performance across environments in Zimbabwe. Selected varieties achieved probabilities above 60% for grain yield, 80% for plant height, and 50% for lodging, indicating greater yield stability and reduced selection risk. By integrating the probability of superior performance within and across environments, the BPSI effectively identified varieties with both specific and broad adaptation. This Bayesian framework provides a robust, data-driven approach for cultivar recommendation in Zimbabwe, combining predictive accuracy and risk management.
 
 ---
 
-## Data & code availability
-
-- **Data**: colocar aqui o link/DOI (Figshare/Zenodo), se público.  
-- **Code**: este repositório.
-
----
-
-## How to cite
-
-> Preprint/Manuscript (em revisão)
-
-Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF, Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A, Mutimaamba C, Scaboo A, Pinheiro JB. *Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe*. BMC Plant Biology, in review, 2025.
-
----
-
-## License
-
-Specify a license (e.g., MIT, GPL-3.0). Example:
+### 📂 Repository structure
 
