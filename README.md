@@ -8,9 +8,7 @@ José Tiago B. Chagas¹*, Mauricio S. Araújo¹, Marcela Martinez¹, João P. S.
 
 ### Dataset description
 
-This repository contains the data and analysis scripts used in the study **“Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe.”** The dataset is part of the **Pan-African Soybean Trials Network**, aiming to identify superior soybean varieties across multiple environments and years using a **Bayesian Probabilistic Selection Index (BPSI)**.  
-
-A total of **97 soybean varieties** were evaluated in **37 environments** over **six crop seasons in Zimbabwe**, with measurements for **grain yield, plant height,** and **lodging**. The Bayesian framework integrates the probability of superior performance within and across environments, providing a risk-aware approach to cultivar recommendation under heterogeneous conditions.
+This repository contains the data and analysis scripts used in the study “Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe.” The dataset is part of the Pan-African Soybean Trials Network, aiming to identify superior soybean varieties across multiple environments and years using a Bayesian Probabilistic Selection Index (BPSI). A total of 97 soybean varieties were evaluated in 37 environments over six crop seasons in Zimbabwe, with measurements for grain yield, plant height, and lodging. The Bayesian framework integrates the probability of superior performance within and across environments, providing a risk-aware approach to cultivar recommendation under heterogeneous conditions.
 
 ---
 
