@@ -39,7 +39,7 @@ This repository is organized into several directories and files to ensure transp
 
 Each directory serves a specific role in the analysis pipeline:
 - **BPSI/** — Contains the main R functions and scripts used to compute the Bayesian Probabilistic Selection Index.  
-- **Plots/** — Stores all figures generated during the analysis, including comparative graphs and the location map (`Map.jpg`).  
+- **Plots/** — Stores all figures generated during the analysis.  
 - **Presentation/** — Includes slides and summaries used in internal or public presentations.  
 - **Saves/** — Contains serialized model outputs (`.rds` or `.RData`), posterior predictive checks, and results ready for reproducibility.  
 - **across_probs/** — Holds aggregated results with probabilities across environments, years, and locations.  
@@ -51,7 +51,6 @@ Each directory serves a specific role in the analysis pipeline:
 - **README.md** — This file, documenting the repository’s purpose, content, and usage.
 
 ---
-
 
 
 ### Citation
