@@ -31,7 +31,7 @@ The BPSI identified ten varieties with high probabilities of superior performanc
 
 ---
 
-### ⚙️ Reproducibility
+### Reproducibility
 
 **Requirements**
 - R ≥ 4.3  
@@ -39,7 +39,19 @@ The BPSI identified ten varieties with high probabilities of superior performanc
   `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`,  
   `readr`, `readxl`, `here`, `janitor`, `brms` or `rstanarm`, `bayesplot`, `cowplot`
 
-**To reproduce the analysis**
-```r
-rmarkdown::render("Zimbabwe_analysis.Rmd", clean = TRUE)
+### Citation
+
+Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF,
+Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A,
+Mutimaamba C, Scaboo A, Pinheiro JB.
+Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe.
+BMC Plant Biology, in review, 2025.
+
+### License
+
+MIT License © 2025 The Authors
+
+### Contact
+José Tiago B. Chagas — josetchagas@usp.br
+José Baldin Pinheiro — jbaldin@usp.br
 
