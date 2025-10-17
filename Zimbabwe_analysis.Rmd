@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("sf")
 #install.packages("stars")
 library(tidyverse) 
-data <- read.csv("data/Zimbabwe.csv",header = T,sep = ";")
+data <- read.csv("data/Zimbabwe1.csv",header = T,sep = ";")
 # colnames(data)
 # head(data)
 pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)] 
@@ -966,15 +966,17 @@ labels <- function(x) {
 
 
 
-GY=GY+ theme(axis.text.y = element_text(size=5.5,color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+
+
+GY=GY+ theme(axis.text.y = element_text(size=5.5,),color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black"),strip.text = element_text(face = "bold")) + labs( title = "Grain Yield",y="Varieties")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels) ##color = ifelse(GY$data$gen %in% gen.sel,  "#E41A1C", "black")
 
  PH$data  <- PH$data %>% filter(fac != "CROP_SEASON")
 
  
-PH=PH+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PH$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Height",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ 
+PH=PH+ theme(axis.text.y = element_text(size=5.5),strip.text = element_text(face = "bold")) + labs( title = "Plant Height",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ 
 scale_y_discrete(labels = labels)
 
-PL=PL+ theme(axis.text.y = element_text(size=5.5, color = ifelse(PL$data$gen %in% gen.sel,  "#E41A1C", "black")),strip.text = element_text(face = "bold")) + labs( title = "Plant Lodging",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
+PL=PL+ theme(axis.text.y = element_text(size=5.5),strip.text = element_text(face = "bold")) + labs( title = "Plant Lodging",y="")+facet_wrap(~fac,scales="free", labeller = labeller(.cols=cols.label))+ scale_y_discrete(labels = labels)
 
 library(ggpubr)
 plot.within = ggarrange(GY,PH,PL,labels = c("A","B","C"),ncol=3, common.legend = T)
@@ -1059,7 +1061,7 @@ load("Saves/res_GY_year.rda")
 df=read.csv("BPSI/bpsi.csv")
 
 gen.sel = df[which(df$sel=="Selected"),"gen"]
-
+sort(gen.sel)
 gen.sel <- gsub("V00","G_",gen.sel)
 GY=plot(res_GY, category = "pair_perfo")
 PH=plot(res_PH, category = "pair_perfo")
@@ -1169,7 +1171,7 @@ df=print(BPSI_soy)
 gen.sel = df[which(df$sel=="Selected"),"gen"]
 
 real.names=distinct(pheno[,c(5,15)])
-
+ 
 df <- left_join(df, real.names, by = c("gen" = "geno"))
 
 
@@ -1366,116 +1368,6 @@ print(plot.bpsi)
 ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 8,width = 12)
 ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 8,width = 12, bg = "white")
 
-```
-
-
-
-```{r bpsi table}
-library(ggpubr)
-library(patchwork)
-
-
-library(ggplot2)
-library(grid)
-library(gtable)
-
-
-
-
-# Convert ggplot to gtable
-g1 <- ggplotGrob(a)
-
-# Show the layout to identify which columns contain each facet
-gtable_show_layout(g1)
-
-## Create individual facet plots by extracting the complete panel areas
-# First facet: columns 6-8, rows 8-11
-g1_facet1 <- g1[8:11, 6:8]
-g1_facet1 <- gtable_add_grob(g1_facet1, g1$grobs[[17]], t = 1, l = 2)  # Add strip
-
-# Second facet: columns 10-12, rows 8-11
-g1_facet2 <- g1[8:11, 10:12]
-g1_facet2 <- gtable_add_grob(g1_facet2, g1$grobs[[18]], t = 1, l = 2)  # Add strip
-
-# Third facet: columns 14-16, rows 8-11
-g1_facet3 <- g1[8:11, 14:16]
-g1_facet3 <- gtable_add_grob(g1_facet3, g1$grobs[[19]], t = 1, l = 2)  # Add strip
-
-# Display the 2x2 grid
-# grid.newpage()
-# grid.arrange(
-#   g1_facet1, g1_facet2, g1_facet3, b,
-#   nrow = 2,
-#   ncol = 2
-# )
-# 
-# 
-# library(patchwork)
-# library(grid)
-# library(gridExtra)
-# library(gtable)
-# 
-# # First, ensure each facet has proper margins for separation
-# # Add padding to each facet grob
-# add_padding <- function(grob, padding = unit(10, "pt")) {
-#   # Create a padding grob
-#   padded_grob <- gtable_add_padding(grob, padding)
-#   return(padded_grob)
-# }
-# 
-# # Add padding to each facet
-# g1_facet1_padded <- add_padding(g1_facet1)
-# g1_facet2_padded <- add_padding(g1_facet2)
-# g1_facet3_padded <- add_padding(g1_facet3)
-# b_padded <- add_padding(b)
-# 
-# # Create the 2x2 grid with proper spacing
-# grid.newpage()
-# grid.arrange(
-#   g1_facet1_padded,    # Top left (A)
-#   g1_facet2_padded,    # Top right (B)
-#   g1_facet3_padded,    # Bottom left (C)
-#   b,            # Bottom right (D)
-#   nrow = 2,
-#   ncol = 2,
-#   padding = unit(20, "pt")  # Space between plots
-# )
-# 
-# # Manually add annotation letters
-# grid.text("A", x = 0.01, y = 0.98, gp = gpar(fontsize = 16, fontface = "bold"))
-# grid.text("B", x = 0.50, y = 0.98, gp = gpar(fontsize = 16, fontface = "bold"))
-# grid.text("C", x = 0.01, y = 0.50, gp = gpar(fontsize = 16, fontface = "bold"))
-# grid.text("D", x = 0.50, y = 0.50, gp = gpar(fontsize = 16, fontface = "bold"))
-
-
-# plot.bpsi <- wrap_plots(plot1,plot2,plot3, b, ncol =2, heights = c(2, 1)) +
-#   plot_annotation(tag_levels = "A")   # Right margin for width
-# 
-# 
-# plot.bpsi <- a / b  + plot_layout(ncol = 1,heights = c(1, 2) )
-# 
-
- wrap1 <- wrap_elements(g1_facet1)
- wrap2 <- wrap_elements(g1_facet2)
- wrap3 <- wrap_elements(g1_facet3)
- # Create the 2x2 layout
- plot.bpsi <- wrap_plots(
-   A = wrap1, 
-   B = wrap2, 
-   C = wrap3, 
-   D = b,
-   design = "
-   AB
-   CD
-   ",
-   widths = c(1, 1),
-   heights = c(1, 1)
- ) + plot_annotation(tag_levels = "A")
-
-
-
-ggsave(plot=plot.bpsi,device = "pdf",filename ="Plots/plots_bpsi.pdf",dpi = "retina",height = 8,width = 12)
-ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "retina",height = 8,width = 12, bg = "white")
 ```
 
 

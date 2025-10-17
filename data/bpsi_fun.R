@@ -162,22 +162,30 @@ BPSI = function(modlist, increase = c(TRUE,FALSE,FALSE), omega, int, save.df = F
   
   if(is.null(omega)) omega=1 else omega=omega
 
-    bpsi <- as.data.frame(apply(df, 2, function(x) {
+    bpsi <- apply(df, 2, function(x) {
       rank(-x, ties.method = "min", na.last = "keep")
-    }))
+    })
 
-bpsi = bpsi / omega
-bpsi$bpsi=rowSums(bpsi)  
-head(bpsi)
 
-gen_sel = bpsi[order(bpsi$bpsi,decreasing = F),]
+bpsi <- apply(bpsi, 2, function(x) {
+max(x) - x})
+
+
+bpsi <- bpsi / (1/omega[col(bpsi)])
+
+
+bpsi <- cbind(bpsi, rowSums(bpsi))
+colnames(bpsi)[ncol(bpsi)] <- "bpsi"
+
+bpsi <- as.data.frame(bpsi)
+gen_sel = bpsi[order(bpsi$bpsi,decreasing = T),]
 
 gen_i = round((length(gen_sel$bpsi) * int),0)
 
 selected=gen_sel[1:gen_i,]
 
 bpsi$sel=ifelse(rownames(bpsi) %in% rownames(selected) , "Selected","Not_Selected")
-bpsi=bpsi[order(bpsi$bpsi,decreasing = F),]
+bpsi=bpsi[order(bpsi$bpsi,decreasing = T),]
 bpsi$gen=rownames(bpsi)
 if(verbose) message('-> Genotypes selected using BPSI')
 attr(bpsi, "control")=int
@@ -357,7 +365,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
     #          data = subset(obja, !gen %in% selected$gen), 
     #          stat = "identity") +    
     ggplot() +
-      geom_col( aes(x = gen,y = max(rank) - rank, fill=sel),data=obja)+
+      geom_col( aes(x = gen,y =rank, fill=sel),data=obja)+
 
       # geom_hline(data = subset(obja, gen %in% selected$gen) %>% group_by(trait) %>% summarize(max_rank = max(rank)),
       #            aes(yintercept = max_rank), linetype = "dashed", color = "red", size = 0.5) +
@@ -390,7 +398,7 @@ plot.BPSI = function(BPSI_result, ..., category = "BPSI"){
     
   
     
-    ggplot(obj, aes(x = as.factor(id), y = max(bpsi) - bpsi, fill = sel)) +  # Reverse values
+    ggplot(obj, aes(x = as.factor(id), y =  bpsi, fill = sel)) +  # Reverse values
       geom_col() +
       scale_fill_manual(values = c("Selected" = "blue3",
                                    "Not_Selected" = "grey"),
