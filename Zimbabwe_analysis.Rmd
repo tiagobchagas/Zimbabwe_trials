@@ -1260,7 +1260,7 @@ pa <- ggplot() +
     labels = c("Not selected", "Selected")
   ) +  
   labs(
-    x = "Genotypes", 
+    x = "Varieties", 
     y = "Ranking of superior performance", 
     fill = expression(bold(Pr(g %in% Omega)))
   )
@@ -1271,8 +1271,6 @@ pb <- ggplot() +
   facet_wrap(~trait, scales = "free_x") +
   theme(
     axis.text.x = element_text(size = 4, angle = 90, hjust = 1, vjust = 0.5),
-    axis.text.y = element_blank(),  # Remove y-axis text
-    axis.ticks.y = element_blank(),  # Remove y-axis ticks
     panel.background = element_blank(),
     legend.position = "none",  # Remove individual legend
     strip.text = element_text(size = 8, face = "bold")
@@ -1283,7 +1281,7 @@ pb <- ggplot() +
     labels = c("Not selected", "Selected")
   ) +  
   labs(
-    x = "Genotypes", 
+    x = "Varieties", 
     y = "",  # Remove y-axis label
     fill = expression(bold(Pr(g %in% Omega)))
   )
@@ -1304,7 +1302,7 @@ pc <- ggplot() +
     labels = c("Not selected", "Selected")
   ) +  
   labs(
-    x = "Genotypes", 
+    x = "Varieties", 
     y = "Ranking of superior performance", 
     fill = expression(bold(Pr(g %in% Omega)))
   )
