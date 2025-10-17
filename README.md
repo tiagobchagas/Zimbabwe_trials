@@ -40,7 +40,7 @@
 
 ## How to cite
 
-> Preprint/Manuscript (em revisão, BMC Plant Biology)
+> Preprint/Manuscript (em revisão)
 
 Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF, Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A, Mutimaamba C, Scaboo A, Pinheiro JB. *Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe*. BMC Plant Biology, in review, 2025.
 
