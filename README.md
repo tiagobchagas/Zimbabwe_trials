@@ -41,11 +41,7 @@ The BPSI identified ten varieties with high probabilities of superior performanc
 
 ### Citation
 
-Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF,
-Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A,
-Mutimaamba C, Scaboo A, Pinheiro JB.
-Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe.
-BMC Plant Biology, in review, 2025.
+Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF, Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A, Mutimaamba C, Scaboo A, Pinheiro JB. Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe. In review, 2025.
 
 ### License
 
