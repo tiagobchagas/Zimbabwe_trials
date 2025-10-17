@@ -31,13 +31,28 @@ The BPSI identified ten varieties with high probabilities of superior performanc
 
 ---
 
-### Reproducibility
+---
 
-**Requirements**
-- R ≥ 4.3  
-- Key R packages:  
-  `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`,  
-  `readr`, `readxl`, `here`, `janitor`, `brms` or `rstanarm`, `bayesplot`, `cowplot`
+### 📁 Repository structure
+
+This repository is organized into several directories and files to ensure transparency, reproducibility, and easy navigation of the Bayesian Probabilistic Selection Index (BPSI) analysis pipeline for soybean trials in Zimbabwe.
+
+Each directory serves a specific role in the analysis pipeline:
+- **BPSI/** — Contains the main R functions and scripts used to compute the Bayesian Probabilistic Selection Index.  
+- **Plots/** — Stores all figures generated during the analysis, including comparative graphs and the location map (`Map.jpg`).  
+- **Presentation/** — Includes slides and summaries used in internal or public presentations.  
+- **Saves/** — Contains serialized model outputs (`.rds` or `.RData`), posterior predictive checks, and results ready for reproducibility.  
+- **across_probs/** — Holds aggregated results with probabilities across environments, years, and locations.  
+- **data/** — Contains input datasets (raw data) and cleaned, pre-processed tables used for modeling.  
+- **misc/** — Keeps supplementary materials and notes.  
+- **Zimbabwe_analysis.Rmd** — The central analysis document integrating data processing, model fitting, and visualization.  
+- **Zimbabwe_analysis.html** — The rendered report for direct visualization of results.  
+- **Zimbabwe_trials.Rproj** — The RStudio project file to ensure a consistent environment.  
+- **README.md** — This file, documenting the repository’s purpose, content, and usage.
+
+---
+
+
 
 ### Citation
 
