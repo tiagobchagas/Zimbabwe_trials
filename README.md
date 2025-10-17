@@ -31,58 +31,15 @@ The BPSI identified ten varieties with high probabilities of superior performanc
 
 ---
 
-### Repository structure
+### ⚙️ Reproducibility
 
-Zimbabwe_trials/
-├─ BPSI/ # Core functions and scripts for Bayesian Probabilistic Selection Index
-├─ Plots/ # Figures and visual outputs (includes Map.jpg)
-├─ Presentation/ # Slides and visual materials
-├─ Saves/ # Saved model objects, checkpoints, ppchecks
-├─ across_probs/ # Probabilities across environments, years, and locations
-├─ data/ # Raw and processed datasets
-├─ misc/ # Auxiliary files (e.g., presentation notes)
-├─ Zimbabwe_analysis.Rmd # Main analysis script (RMarkdown)
-├─ Zimbabwe_analysis.html # Rendered report
-├─ Zimbabwe_trials.Rproj # RStudio project file
-└─ README.md # Project documentation
-
----
-### Reproducibility
-
-**Requirements:**
+**Requirements**
 - R ≥ 4.3  
-- Key packages: `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`,  
+- Key R packages:  
+  `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`,  
   `readr`, `readxl`, `here`, `janitor`, `brms` or `rstanarm`, `bayesplot`, `cowplot`
 
-**To reproduce the analysis:**
+**To reproduce the analysis**
 ```r
 rmarkdown::render("Zimbabwe_analysis.Rmd", clean = TRUE)
-
----
-### Reproducibility
-
-**Requirements:**
-- R ≥ 4.3  
-- Key packages: `tidyverse`, `data.table`, `ggplot2`, `rmarkdown`, `patchwork`,  
-  `readr`, `readxl`, `here`, `janitor`, `brms` or `rstanarm`, `bayesplot`, `cowplot`
-
-**To reproduce the analysis:**
-```r
-rmarkdown::render("Zimbabwe_analysis.Rmd", clean = TRUE)
-Outputs:
-Figures → Plots/
-Model results → Saves/
-
-### Citation
-
-Chagas JTB, Araújo MS, Martinez M, Pavan JPS, Leles EP, Santos MF, Diers BW, Goldsmith P, Mwadzingeni L, Mukaro R, Henderson A, Mutimaamba C, Scaboo A, Pinheiro JB. Leveraging probabilistic models to enhance cultivar recommendation in Zimbabwe. BMC Plant Biology, in review, 2025.
-
-### License
-
-MIT License © 2025 The Authors
-
-### Contact
-
-José Tiago B. Chagas — josetchagas@usp.br
-José Baldin Pinheiro — jbaldin@usp.br
 
