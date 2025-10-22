@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #install.packages("sf")
 #install.packages("stars")
 library(tidyverse) 
-data <- read.csv("data/Zimbabwe1.csv",header = T,sep = ";")
+data <- read.csv("data/Zimbabwe.csv",header = T,sep = ";")
 # colnames(data)
 # head(data)
 pheno<- data[, c(4, 7, 16,21,25,27,38,41,46,63,64,65,66,68)] 
@@ -1248,7 +1248,7 @@ library(patchwork)
 
 # Plot A
 pa <- ggplot() + 
-  geom_col(aes(x = gen, y = max(rank) - rank, fill = sel), data = obja |> filter(trait == "Grain Yield")) +
+  geom_col(aes(x = gen, y = rank, fill = sel), data = obja |> filter(trait == "Grain Yield")) +
   facet_wrap(~trait, scales = "free_x") +
   theme(
     axis.text.x = element_text(size = 4, angle = 90, hjust = 1, vjust = 0.5),
@@ -1269,7 +1269,7 @@ pa <- ggplot() +
 
 # Plot B (no y-axis)
 pb <- ggplot() + 
-  geom_col(aes(x = gen, y = max(rank) - rank, fill = sel), data = obja |> filter(trait == "Plant Height")) +
+  geom_col(aes(x = gen, y =  rank, fill = sel), data = obja |> filter(trait == "Plant Height")) +
   facet_wrap(~trait, scales = "free_x") +
   theme(
     axis.text.x = element_text(size = 4, angle = 90, hjust = 1, vjust = 0.5),
@@ -1290,7 +1290,7 @@ pb <- ggplot() +
 
 # Plot C (with y-axis)
 pc <- ggplot() + 
-  geom_col(aes(x = gen, y = max(rank) - rank, fill = sel), data = obja |> filter(trait == "Plant Lodging")) +
+  geom_col(aes(x = gen, y =  rank, fill = sel), data = obja |> filter(trait == "Plant Lodging")) +
   facet_wrap(~trait, scales = "free_x") +
   theme(
     axis.text.x = element_text(size = 4, angle = 90, hjust = 1, vjust = 0.5),
@@ -1311,7 +1311,7 @@ pc <- ggplot() +
 
 obj$trait <- "Simultaneous Selection"
 # Plot D (modified to exclude fill legend contribution)
-pd <- ggplot(obj, aes(x = as.factor(id), y = max(bpsi) - bpsi)) +
+pd <- ggplot(obj, aes(x = as.factor(id), y = bpsi)) +
   geom_col(aes(fill = sel)) +
   scale_fill_manual(
     values = c("Selected" = "blue3", "Not_Selected" = "grey"),
@@ -1328,7 +1328,7 @@ pd <- ggplot(obj, aes(x = as.factor(id), y = max(bpsi) - bpsi)) +
     guide = "none"
   ) +
   coord_polar(start = 0, clip = "off") +  # Allow labels to extend outside plot
-  geom_segment(aes(x = id, xend = id, y = max(bpsi) - bpsi, yend = max(bpsi) + 15),  # Extend segments
+  geom_segment(aes(x = id, xend = id, y = bpsi, yend = max(bpsi) + 15),  # Extend segments
                color = "grey100", linewidth = 0.3) +
   geom_text(aes(x = id, y = max(bpsi) + 20, label = gen, angle = angle, hjust = hjust),  # Move labels outward
             size = 2.8) +
@@ -1374,6 +1374,7 @@ ggsave(plot=plot.bpsi,device = "png",filename ="Plots/plots_bpi.png",dpi = "reti
 ```{r bpsi table 1}
 BPSI_soy$BPSI |> kable(format = "latex", booktabs = TRUE, longtable=TRUE, row.names = F)
 
+BPSI_soy$df |> kable(format = "latex", booktabs = TRUE, longtable=TRUE, row.names = T)
 ```
 
 
