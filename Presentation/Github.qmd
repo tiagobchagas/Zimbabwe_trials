@@ -82,8 +82,8 @@ Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com
 ## Configuração de git e Rstudio  
 - (em teoria, só precisa ser realizado apenas 1x em cada computador)   
 - No Terminal, proceda com os seguintes comandos:   
-- git config --global user.name "Your Name"  
-- git config --global user.email "your_email@example.com"
+- `git config --global user.name` "Your Name"  
+- `git config --global user.email` "your_email@example.com"
 
 ## Conecte o RStudio ao Github seguindo os passos abaixo{.scrollable}
 :::: columns
@@ -91,9 +91,9 @@ Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com
 1. In RStudio, go to Tools > Global Options... > Git/SVN
 2. Make sure Enable version control for RStudio projects is selected
 3. Make sure to point to the right path for Git executable (and don’t worry about SVN)
-4. Click on Create RSA Key... and click on Create
+4. Click on Create RSA Key... and click on Create (and don’t worry about password)
 5. Click on View public key, and press Crtl + C to copy the key to the clipboard
-6. Go to [https://github.com/settings/keys](https://github.com/settings/keys) and click on New SHH key
+6. Go to [https://github.com/settings/keys](https://github.com/settings/keys) and click on New SSH key
 7. Give a title to your key (identifying the computer your at), e.g. “PCname_Sist.Operacional”
 8. Paste (Crtl + V) the key from your clipboard
 9. Click on Add SSH key
