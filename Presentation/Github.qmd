@@ -1,5 +1,5 @@
 ---
-title: "Integração Rstudio, Git and Github"
+title: "Integrating Rstudio, Git and Github"
 author: 
 - Chagas, J.T.B
 format:
@@ -8,6 +8,7 @@ format:
     width: 1600
     height: 900
     incremental: true
+    transition: slide 
     highlight-style: arrow
     code-tools:
       source: true
@@ -28,64 +29,64 @@ editor_options:
 bibliography: references.bib
 ---
 
-## Introdução
+## Background
 
-::: {.callout-important .justify icon="false"}
--   Git [(Downlad do software)](https://git-scm.com/downloads)
--   Rstudio [(Downlad do software)](https://posit.co/download/rstudio-desktop/)
--   Github  [(Criar conta)](https://github.com/)
+::: {.callout-important } 
+-   Git [(Software downlad)](https://git-scm.com/downloads)
+-   Rstudio [Software downlad)](https://posit.co/download/rstudio-desktop/)
+-   Github  [(Create account)](https://github.com/)
 :::
 
-## Introdução
+## Background
 
 :::: {layout="[ 30, 70 ]"}
 ![](../misc/git.png){fig-align="left" width="200" heigth="150"}
 
 ::: {#sec-column}
--   Git é um sistema de controle de versão
--   Permite o **gerenciamento**, **compartilhamento** e **resgitro** de códigos
--   Permite que você *volte a versões anteriores a qualquer momento*
+-   Git is a version control system
+-   Enables  **managing**, **sharing** and **register** code development
+-   Allow `traceback to old version at any time`
 :::
 ::::
 
-## Introdução
+## Background
 
 :::: {layout="[ 30, 70 ]"}
 ![](../misc/github.png){fig-align="left" width="200" heigth="150"}
 
 <div>
 
--   GitHub é uma *plataforma online de hospedagem de projetos*
--   A plataforma utiliza o sistema git
--   Permite a criação e compartilhamento de **repositórios**
+-   GitHub is an **online platform to hosting projects**
+-   Integrates with git system
+-   Enable create and sharing `repositories`
 
 </div>
 ::::
 
-## Introdução
+## Background
 
 :::: {layout="[ 30, 70 ]"}
 ![](../misc/rstudio.png){fig-align="left" width="200" heigth="150"}
 
 <div>
 
--   Rstudio é um *"Integrated Development Environment"*
--   Utiliza a linguagem de programação **R**
--   Permite a integração com o git e o GitHUb
+-   Rstudio is *"Integrated Development Environment"*
+-   Use `R` programming language 
+-   Allow integration between `Git` and `GitHub`
 
 </div>
 ::::
 
-## Criação de conta no Github      
-Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com/) e crie uma conta.  
+## Creating Github account    
+If you haven't account, go to  [(https://github.com/)](https://github.com/).  
 
-## Configuração de git e Rstudio  
-- (em teoria, só precisa ser realizado apenas 1x em cada computador)   
-- No Terminal, proceda com os seguintes comandos:   
+## Setting git and Rstudio  
+- ( Only needs to be done one time per PC `1x`)   
+- At Terminal, proceed with the following commands:   
 - `git config --global user.name` "Your Name"  
 - `git config --global user.email` "your_email@example.com"
 
-## Conecte o RStudio ao Github seguindo os passos abaixo{.scrollable}
+## Connect RStudio to Github {.scrollable}
 :::: columns
 ::: {.column}
 1. In RStudio, go to Tools > Global Options... > Git/SVN
@@ -114,16 +115,20 @@ Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com
 :::
 ::::
 
-## Conecte o git ao Github seguindo os passos abaixo{.scrollable}
+## Connect RStudio to Github {.scrollable}
 :::: {.columns}
-::: {.column width="50%"}
-1. No Terminal, rode: `gh auth login` 
-2. Pressione ENTER até chegar a: *What is your preferred protocol for Git operations?* E selecione `SSH`. 
-3. Continue pressionando ENTER para as demais perguntas até que um código seja gerado (copie-o) e pressione ENTER mais uma vez 
-4. Cole o código do terminal na janela do browser (pode ser necessário fazer o login no Github antes) e clique no botão Authorize github 
+::: {.column width="60%"}
+1. At Terminal, run: `gh auth login` 
+2. Press ENTER until see: *What is your preferred protocol for Git operations?*
+then select `SSH`. 
+3. Keep pressing ENTER to the next question until generate a code  (copy)
+and press ENTER again 
+4. Paste the code on terminal at window browser 
+(maybe you need to login GitHub before) 
+then click in the button to Authorize github 
 :::
 
-::: {.column width="50%"}
+::: {.column width="40%"}
 ![](../misc/screen/7.png){.fragment fig-align="right" .fade-in}
 ![](../misc/screen/8.png){.fragment fig-align="right" .fade-in}
 ![](../misc/screen/9.png){.fragment fig-align="right" .fade-in}
@@ -132,38 +137,52 @@ Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com
 ::::
 
 ## Hands on
-### Criando um novo repositório
+### Creating a repository 
 1. Go to [http://github.com/new](http://github.com/new)
 2. Choose a repository name, e.g. r_sandbox
 3. Click on Private
 4. Select Add a README file 
-5. Select Add .gitignore (and pick **R** as your .gitignore template)
+5. Select Add .gitignore (and pick `R` as your .gitignore template)
 6. Click Create Repository
 7. Go to Code > SSH and copy the SSH address
 
 ## Hands on{.scrollable}
-### Copiando um repositório existente
+### Copying a repository 
 1. In RStudio, go to File > New Project... > Version Control > Git
 2. Go to the Github repository, then Code > SSH and copy the SSH address (if you haven’t done so already) instead of HTTPS
 3. Paste (Crtl + V) the SSH address for repository of interest from your clipboard
 4. If a pop-up window appears asking for username, do the gh auth login steps again (even if it says you’ve already done it)
 5. Choose the folder where your project will be saved (e.g. create a folder named git to save all your repositories in one single place)
 6. Click on Create Project
-7. Se, depois de copiar um repositório existente, a aba Git não aparecer no RStudio, você precisa ir:  
-7.1 Em Tools > Project options > Git/SVN, in Version control system, select Git  
-7.2 No Terminal do RStudio, rode git remote -v e, em seguida, o rode todo o comando que começa com `git config --global --add safe.directory`
+7. In case of Git tab not appear in RStudio, after after copy a repository, you must go:  
+7.1  Tools > Project options > Git/SVN, in Version control system, select Git  
+7.2  At RStudio Terminal, run git remote -v e, then, run `git config --global --add safe.directory`
 
-## Hands on
-### Desfazendo um commit 
-- O RStudio dá um recado antes do commit se houver arquivos >5MB (ainda que o Github permita enviar arquivos de até 25 MB).   
-- Caso o aviso apareça, antes de prosseguir, garanta que os arquivos grandes estejam no .gitignore (basta clicar com o botão direito sobre o arquivo, e escolher “ignore”).  
-- Caso tenha realizado o commit, o push não vai acontecer. Desse modo, você precisa desfazer o commit, incluir o arquivo no .gitignore para depois prosseguir.  
 
-- ### Para desfazer um commit rode o seguinte comando:  
+## First commit 
+- Go to Rstudio terminal
+- type `git add .` to add all files
+- type `git commit -m "message"` to commit message
+- type `git push` to push to GitHub
+
+## Tips
+
+::: {.callout-warning } 
+when open project  type `git pull` in terminal (to update repository) before making changes 
+:::
+
+## Undo a commit 
+- RStudio gives a note before commit if you have `files > 5MB` ( Github allow send files until 25 MB).   
+- If the note appear, before to proceed to push, make sure the larger files are in the .gitignore ( click with the right button on the file, then select "ignore").  
+- If you have commited the files , the push will not happen. 
+- In this way, you need undo the commit, include the large file on .gitignore before to proceed.  
+
+## Undo a commit  
 
 1. git reset --soft HEAD~
-2. DICA: Adicione um número no final para desfazer múltiplos commits. Por exemplo, para desfazer os últimos 2 commits (assumindo que os dois não passaram pelo push), rode: git reset --soft HEAD~2
-3. Inclua os arquivos grandes no .gitignore e proceda com commit + push
+2. Tip: Add a number on the final to undo multiple commits. 
+To undo the last 2 commits ( both are not pushed yet), run: `git reset --soft HEAD~2`
+3. Include large files on .gitignore and proceed with  `commit` + `push`
 
 
 
@@ -173,9 +192,9 @@ Se já não possui uma conta, vá ao  [(https://github.com/)](https://github.com
 
 
 
-## Perguntas?
+## Any Questions?
 
 -   josetchagas\@usp.br
--   Obrigado!
+-   Thank you!
 
 

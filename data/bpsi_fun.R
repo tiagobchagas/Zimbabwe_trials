@@ -61,9 +61,7 @@
 ##' 
 ##' Chagas, J. T. B., Dias, K. O. das G., Quintão Carneiro, V., de Oliveira, L. M. C., Nunes, N. X., Júnior, J. D. P., Carneiro, P. C. S., & Carneiro, J. E. de S. (2025). 
 ##' Bayesian probabilistic selection index in the selection of common bean families.
-##'  Crop Science, 65(3).
-##' 
-##' \doi{https://doi.org/10.1002/CSC2.70072}
+##'  \emph{Crop Science}, 65(3). \doi{https://doi.org/10.1002/CSC2.70072}
 ##'
 ##'
 ##' @import ggplot2
@@ -71,7 +69,7 @@
 ##' @importFrom stats reshape median quantile na.exclude model.matrix aggregate
 ##' @importFrom rlang .data
 ##'
-##' @seealso [ProbBreed::plot.probsup]
+##' @seealso [ProbBreed::plot.BPSI]
 ##'
 ##' @export
 ##'
