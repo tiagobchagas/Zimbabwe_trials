@@ -545,9 +545,9 @@ for (j in names(data.list)) {
   
 
   
-  summar.mat = matrix(nrow = length(traits), ncol = 5, 
+  summar.mat = matrix(nrow = length(traits), ncol = 6, 
                       dimnames = list(traits, 
-                                      c("geno","error","H2", "CV","H2_em")))
+                                      c("geno","error","H2", "CV","H2_em", "H2_cul")))
 
   vc.env = list()
   Blue.env = list()
@@ -610,6 +610,20 @@ for (j in names(data.list)) {
     h2 = vpredict(model.r, h2~(V1)/(V1+V2))
     h2 = vpredict(model.r, h2~(V1)/(V1+V2))
     h2_em <- vpredict(model.r, h2~(V1)/(V1+(V2/nrep)))
+    
+    sum = summary(model.r)$varcomp
+    mvd = mean(((predict.asreml(model.r,classify = "geno",sed = T)$sed)^2)[
+  upper.tri((predict.asreml(model.r,classify = "geno",sed = T)$sed)^2,diag=F)
+])
+  PEV = mean(diag((predict.asreml(model.r,classify = "geno",vcov = T)$vcov)))
+  acc = sqrt(1-(PEV/sum["geno","component"]))
+  h2.cul = 1-(mvd/(2*sum["geno","component"]))
+
+  blup = predict.asreml(model.r,classify = "geno")$pvals
+
+  gain = (mean(blup[order(blup$predicted.value, 
+                              decreasing = T),]$predicted.value[1:30])-
+             mean(x[,i], na.rm=T))/mean(x[,i], na.rm=T) * 100
 
 
 
@@ -619,7 +633,7 @@ for (j in names(data.list)) {
       mean(x[,i], na.rm = TRUE)*100
     
     summar.mat[i,] = c(varcomp$signi2[1], round(varcomp$component[2],4), 
-                       round(h2$Estimate,4), round(CV,4), round(h2_em$Estimate,4))
+                       round(h2$Estimate,4), round(CV,4), round(h2_em$Estimate,4), round(h2.cul,4))
     
     
     pred=predict(model.f, classify = "geno", vcov = T)
@@ -716,7 +730,9 @@ ggsave(plot=stvclp,device = "pdf",filename ="Plots/individual_analysis.pdf",dpi 
 ggsave(plot=stvclp,device = "png",filename ="Plots/individual_analysis.png",dpi = "retina",height = 10,width = 15,bg = "white")
 
 stvc$H2_em <- as.numeric(stvc$H2_em)
-stvc_bef <- stvc |>  select(H2, CV, trait, env, geno_sig,H2_em) |> pivot_longer(cols=c(H2,CV,H2_em)) |>  
+stvc$H2_cul <-  as.numeric(stvc$H2_cul)
+
+stvc_bef <- stvc |>  select(H2, CV, trait, env, geno_sig,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)) |>  
   ggplot(aes(x=env,y=value))+geom_col(aes(fill = trait), position = position_dodge())+ facet_grid(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90)) + labs(x= "Environments", y="Parameters")
 
 
@@ -730,18 +746,18 @@ stvc$CV[stvc$CV == 99.4859] <- NA
 
 
 
-unique(stvc |>  select(H2, CV, trait, env, geno_sig,H2_em) |> pivot_longer(cols=c(H2,CV,H2_em)))$name
+unique(stvc |>  select(H2, CV, trait, env, geno_sig,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)))$name
 
 stvc$year <- gsub(".*_", "", stvc$env)
 stvc$envs <- gsub("_.*", "", stvc$env)
 head(stvc)
 
-stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em) |> pivot_longer(cols=c(H2,CV,H2_em)) |>  
+stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)) |>  
   ggplot()+ geom_boxplot(aes(x=envs,y=value, fill=envs))+
   facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
                                                      strip.text = element_text(face = "bold")) + labs(x= "Location", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_env
 
-stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em) |> pivot_longer(cols=c(H2,CV,H2_em)) |>  
+stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)) |>  
   ggplot()+ geom_boxplot(aes(x=year,y=value, fill=year))+
   facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
                                                      strip.text = element_text(face = "bold")) + labs(x= "Year", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_year
