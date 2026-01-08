@@ -752,12 +752,16 @@ stvc$year <- gsub(".*_", "", stvc$env)
 stvc$envs <- gsub("_.*", "", stvc$env)
 head(stvc)
 
-stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)) |>  
+
+
+stvc_env <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(CV,H2_cul)) |>  
   ggplot()+ geom_boxplot(aes(x=envs,y=value, fill=envs))+
   facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
                                                      strip.text = element_text(face = "bold")) + labs(x= "Location", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_env
 
-stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(H2,CV,H2_em,H2_cul)) |>  
+
+
+stvc_year <- stvc |>  select(H2, CV, trait, env, geno_sig, envs,year,H2_em,H2_cul) |> pivot_longer(cols=c(CV,H2_cul)) |>  
   ggplot()+ geom_boxplot(aes(x=year,y=value, fill=year))+
   facet_grid2(name~trait, scales = "free_y") + theme(legend.position = "none", axis.text.x = element_text(angle = 90),
                                                      strip.text = element_text(face = "bold")) + labs(x= "Year", y="Parameters")+ scale_x_discrete(labels = cols.label);   stvc_year
@@ -779,9 +783,100 @@ plot.par = ggarrange(stvc_env, stvc_year,labels = c("A","B"),ncol = 1, common.le
    
 
    
-ggsave(plot=plot.par,device = "pdf",filename ="Plots/plots_parameters.pdf",dpi = "retina",height = 10,width = 12)
-ggsave(plot=plot.par,device = "png",filename ="Plots/plots_parameters.png",dpi = "retina",height = 10,width = 12,bg = "white")
+ggsave(plot=plot.par,device = "pdf",filename ="Plots/plots_parameters_cul.pdf",dpi = "retina",height = 10,width = 12)
+ggsave(plot=plot.par,device = "png",filename ="Plots/plots_parameters_cul.png",dpi = "retina",height = 10,width = 12,bg = "white")
 ```
+
+# Likelihood ratio test
+
+```{r}
+
+x <- pheno
+
+models <- c ( "L : Y", "G : L : Y")
+
+x$L <- x$LOCATION_NAME
+x$Y <- as.factor(gsub(".*_", "", pheno$trial))
+x$G <- x$geno
+j="G : L "
+result=NULL
+lrt=NULL
+lrts=NULL
+i <- "Plant lodging"
+  lrt.mat = matrix(nrow = length(traits), ncol = 2, 
+                      dimnames = list(traits, 
+                                      c("L : Y", "G : L : Y")))
+    results_df <- data.frame()
+for (i in traits) {
+    
+    message("====> Trait:", i)
+    
+    if(all(is.na(x[,i]))) next
+
+
+  for (j in models) {
+    
+    message("====> Model:", j)
+    str.mod <- as.character(NA)
+    str.mod[1] <- paste0("asreml::asreml(fixed=x[,i] ~ rep") 
+    # str.mod[1] <- paste0("asreml::asreml(fixed=",i,"~ rep") 
+    str.mod[2] <- paste0("random = ~ geno +", j)
+    str.mod[3] <- "residual = ~units"
+    str.mod[4] <- "data = x, maxit = 50, workspace = '1gb', na.action = na.method(x = 'include', y = 'include'))"
+    
+    # Combine into a complete model formula
+    code <- paste(str.mod[1], str.mod[2], str.mod[3], str.mod[4], sep = ", ")
+    
+  
+    # 
+    # model.r = asreml(fixed = x[,i] ~ rep, 
+    #                 random = as.formula(paste("~ geno +",j)),
+    #                  maxit = 50,
+    #                residual = ~units,
+    #                data = x, na.action = na.method(x = "include", y = "include"))
+    # model.r$call
+    
+      model <- tryCatch(expr = {
+      eval(parse(text = code))
+    }, error = function(msg) {
+      message("Error in gmoda fitting: ", msg)
+      return(NULL)
+    })
+    
+    
+    lrtest = as.data.frame(lrt(asreml(fixed = x[,i] ~ rep,
+                        random=~geno+ G:L + G:Y,              
+                        residual = ~units, maxit = 50,
+                        data = x),model))
+
+    result <- lrtest$`Pr(Chisq)`
+
+  
+    lrt.mat[i,j] =  result
+  results_df <- rbind(results_df, data.frame(
+  row = i,
+  col = j,
+  pvalue = lrtest$`Pr(Chisq)`,
+  lrstat = lrtest$`LR-statistic`
+))
+       # lrt[,j]=lrtest$`LR-statistic` 
+  }
+    
+}
+    
+lrtplot=results_df |> 
+  ggplot(aes(x = row, y = -log(pvalue))) +
+  geom_col(aes(fill=row)) +
+  geom_hline(aes(yintercept = -log(0.05), 
+             color = "0.05"), 
+             linetype = "dashed", 
+             linewidth = 1)+facet_wrap(~col)+labs(x="effect",colour="Significance",fill="Trait");lrtplot
+
+ggsave(lrtplot,filename="Plots/lrt.pdf" ,device = "pdf",dpi = "retina")
+
+```
+
+
 
 # Bayesian model
 
