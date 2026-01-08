@@ -783,8 +783,8 @@ plot.par = ggarrange(stvc_env, stvc_year,labels = c("A","B"),ncol = 1, common.le
    
 
    
-ggsave(plot=plot.par,device = "pdf",filename ="Plots/plots_parameters_cul.pdf",dpi = "retina",height = 10,width = 12)
-ggsave(plot=plot.par,device = "png",filename ="Plots/plots_parameters_cul.png",dpi = "retina",height = 10,width = 12,bg = "white")
+ggsave(plot=plot.par,device = "pdf",filename ="Plots/plots_parameters_cul.pdf",dpi = "retina",height = 8,width = 10)
+ggsave(plot=plot.par,device = "png",filename ="Plots/plots_parameters_cul.png",dpi = "retina",height = 8,width = 10,bg = "white")
 ```
 
 # Likelihood ratio test
